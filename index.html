@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circuit Cart Dashboard</title>
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+  <!-- Main Dashboard -->
+  <div id="dashboard">
+    <header>
+      <img src="assets/logo.png" alt="Logo" class="logo">
+    </header>
+
+    <main>
+      <!-- Left Section: Camera Feed and Label Feed -->
+      <div class="left-section">
+        <div>
+          <h2>Camera Feed</h2>
+          <img id="camera-image" src="" alt="Camera Feed">
+        </div>
+        <div>
+          <h2>Label Feed</h2>
+          <div id="label-data">
+            <p>Loading label data...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Section: Cart List -->
+      <div class="right-section">
+        <h2>Cart List</h2>
+        <div id="cart-list">
+          <!-- Cart items will be dynamically added here -->
+        </div>
+        <div id="total-amount">
+          <p>Total: $<span id="total-value">0.00</span></p>
+        </div>
+        <div class="buttons">
+          <button id="pay-button">PAY</button>
+          <button id="cancel-button">CANCEL</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>Powered by Circuit Cart</p>
+    </footer>
+  </div>
+
+  <!-- Payment Page -->
+  <div id="payment-page" style="display: none;">
+    <header>
+      <h1>Select Payment Method</h1>
+    </header>
+
+    <main>
+      <div class="payment-options">
+        <!-- Credit Card -->
+        <div class="payment-card" onclick="selectPayment('CREDIT')">
+          <img src="assets/credit card.png" alt="Credit Card">
+          <p>Credit Card</p>
+        </div>
+
+        <!-- Debit Card -->
+        <div class="payment-card" onclick="selectPayment('DEBIT')">
+          <img src="assets/debit card.png" alt="Debit Card">
+          <p>Debit Card</p>
+        </div>
+
+        <!-- EZ Cash -->
+        <div class="payment-card" onclick="selectPayment('EZ_CASH')">
+          <img src="assets/ez cash.png" alt="EZ Cash">
+          <p>EZ Cash</p>
+        </div>
+
+        <!-- M Cash -->
+        <div class="payment-card" onclick="selectPayment('M_CASH')">
+          <img src="assets/m cash.png" alt="M Cash">
+          <p>M Cash</p>
+        </div>
+
+        <!-- I Pay -->
+        <div class="payment-card" onclick="selectPayment('I_PAY')">
+          <img src="assets/i pay.png" alt="I Pay">
+          <p>I Pay</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Barcode Scan Page -->
+  <div id="barcode-scan-page" style="display: none;">
+    <header>
+      <h1>Scan Your Card</h1>
+    </header>
+
+    <main>
+      <div class="barcode-scan-section">
+        <input
+          type="text"
+          id="barcode-input"
+          placeholder="Scan Debit/Credit Card"
+          autofocus
+        />
+      </div>
+    </main>
+  </div>
+
+ <!-- Bill/Receipt Page -->
+<div id="bill-page" style="display: none;">
+  <header>
+    <h1>🎉 Payment Successful! 🎉</h1>
+    <button onclick="goBackToDashboard()">Back to Home</button>
+  </header>
+
+  <main>
+    <div class="bill-container">
+      <!-- Left Side: Bill Details -->
+      <div class="bill-details">
+        <h2>Your Bill</h2>
+        <div id="bill-items">
+          <!-- Bill items will be dynamically added here -->
+        </div>
+        <div id="bill-total">
+          <p>Total: $<span id="bill-total-value">0.00</span></p>
+        </div>
+      </div>
+
+      <!-- Right Side: Number Pad and Mobile Number Input -->
+      <div class="number-pad-section">
+        <div>
+          <input type="text" id="phone-number" placeholder="Enter phone number" readonly />
+        </div>
+        <div class="number-pad">
+          <button onclick="appendNumber('1')">1</button>
+          <button onclick="appendNumber('2')">2</button>
+          <button onclick="appendNumber('3')">3</button>
+          <button onclick="appendNumber('4')">4</button>
+          <button onclick="appendNumber('5')">5</button>
+          <button onclick="appendNumber('6')">6</button>
+          <button onclick="appendNumber('7')">7</button>
+          <button onclick="appendNumber('8')">8</button>
+          <button onclick="appendNumber('9')">9</button>
+          <button onclick="appendNumber('0')">0</button>
+          <button onclick="clearNumber()">C</button>
+          <button onclick="sendBillViaSMS()">Send</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+  <script src="scripts/main.js"></script>
+</body>
+</html>
