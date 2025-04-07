@@ -5,12 +5,7 @@ import {
   collection, 
   addDoc, 
   serverTimestamp,
-  getDocs,
-  query,
-  orderBy,
-  limit,
-  updateDoc,
-  doc
+  getDocs
 } from "firebase/firestore";
 
 // Firebase configuration
@@ -165,6 +160,12 @@ document.getElementById("pay-button").addEventListener("click", () => {
   document.getElementById("payment-page").style.display = "block";
 });
 
+document.getElementById("cancel-button").addEventListener("click", () => {
+  cart = [];
+  updateCartList();
+  updateTotalAmount();
+});
+
 async function selectPayment(method) {
   if (method === "CREDIT" || method === "DEBIT") {
     document.getElementById("payment-page").style.display = "none";
@@ -233,18 +234,6 @@ async function sendBillViaSMS() {
   }
 
   try {
-    // Get most recent bill
-    const billsQuery = await getDocs(
-      query(collection(db, 'bills'), orderBy('timestamp', 'desc'), limit(1))
-    );
-    
-    if (!billsQuery.empty) {
-      await updateDoc(doc(db, 'bills', billsQuery.docs[0].id), {
-        phoneNumber: phoneNumber
-      });
-    }
-
-    // Send SMS
     const billMessage = `Your Bill:\n${cart.map(item => 
       `${PRICES[item.label].description} - $${item.price.toFixed(2)} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`
     ).join('\n')}\nTotal: $${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`;
