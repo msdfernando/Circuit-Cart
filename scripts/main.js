@@ -1,6 +1,17 @@
 // Import Firebase modules
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  serverTimestamp,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  updateDoc,
+  doc
+} from "firebase/firestore";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -27,16 +38,16 @@ const FEEDS = {
   LABEL: "label"
 };
 
-// Cart to store detected items
+// Cart and product variables
 let cart = [];
+let PRICES = {};
 
 // Twilio credentials
 const TWILIO_ACCOUNT_SID = 'AC9802b8b790a4dae149be9a52a2c67620';
 const TWILIO_AUTH_TOKEN = '6aa01d546c7800614c6e791e298b8fbd';
 const TWILIO_PHONE_NUMBER = '+18312783055';
 
-// Fetch product prices from Firestore
-let PRICES = {};
+// Load products from Firestore
 async function loadProducts() {
   try {
     const snapshot = await getDocs(collection(db, 'products'));
@@ -48,10 +59,10 @@ async function loadProducts() {
         description: data.description
       };
     });
-    console.log("Products loaded from Firestore");
+    console.log("Products loaded successfully");
   } catch (error) {
     console.error("Error loading products:", error);
-    // Fallback to default prices if Firestore fails
+    // Fallback to default prices
     PRICES = {
       SOORYA: { price: 20.00, description: "SOORYA Matches Box, Avg. Sticks 45" },
       ZESTA: { price: 100.00, description: "ZESTA Green Tea, 2g" },
@@ -64,7 +75,7 @@ async function loadProducts() {
 // Initialize products
 loadProducts();
 
-// Function to fetch data from Adafruit IO
+// Fetch data from Adafruit IO
 async function fetchData(feedKey, elementId) {
   const url = `https://io.adafruit.com/api/v2/${ADAFRUIT_AIO_USERNAME}/feeds/${feedKey}/data/last`;
 
@@ -91,9 +102,83 @@ async function fetchData(feedKey, elementId) {
   }
 }
 
-// [Keep all your existing display functions: displayData, displayImage, etc.]
+// Display functions
+function displayData(value, elementId) {
+  const element = document.getElementById(elementId);
+  if (element) element.innerHTML = `Detected Object: <strong>${value}</strong>`;
+}
 
-// Modified payment function to save to Firestore
+function displayImage(base64Data, elementId) {
+  const image = document.getElementById(elementId);
+  if (image) image.src = `data:image/jpeg;base64,${base64Data}`;
+}
+
+// Cart management functions
+function updateCart(label) {
+  const normalizedLabel = label.trim().toUpperCase();
+  
+  if (PRICES[normalizedLabel]) {
+    const existingItem = cart.find(item => item.label.toUpperCase() === normalizedLabel);
+    
+    if (!existingItem) {
+      cart.push({
+        label: normalizedLabel,
+        price: PRICES[normalizedLabel].price,
+        quantity: 1,
+      });
+      updateCartList();
+      updateTotalAmount();
+    }
+  }
+}
+
+function updateCartList() {
+  const cartElement = document.getElementById("cart-list");
+  if (cartElement) {
+    cartElement.innerHTML = "";
+    cart.forEach(item => {
+      const itemElement = document.createElement("div");
+      itemElement.innerHTML = `
+        <p>${PRICES[item.label].description} - $${item.price.toFixed(2)}</p>
+        <div class="quantity-controls">
+          <span>${item.quantity}</span>
+          <button onclick="increaseQuantity('${item.label}')">+</button>
+          <button onclick="decreaseQuantity('${item.label}')">-</button>
+        </div>
+      `;
+      cartElement.appendChild(itemElement);
+    });
+  }
+}
+
+function updateTotalAmount() {
+  const totalElement = document.getElementById("total-value");
+  if (totalElement) {
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    totalElement.textContent = total.toFixed(2);
+  }
+}
+
+// Payment processing
+document.getElementById("pay-button").addEventListener("click", () => {
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("payment-page").style.display = "block";
+});
+
+async function selectPayment(method) {
+  if (method === "CREDIT" || method === "DEBIT") {
+    document.getElementById("payment-page").style.display = "none";
+    document.getElementById("barcode-scan-page").style.display = "block";
+  } else {
+    const success = await completePayment(method);
+    if (success) {
+      document.getElementById("payment-page").style.display = "none";
+      document.getElementById("bill-page").style.display = "block";
+      displayBill();
+    }
+  }
+}
+
 async function completePayment(paymentMethod) {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
@@ -112,57 +197,57 @@ async function completePayment(paymentMethod) {
     });
     return true;
   } catch (error) {
-    console.error("Error saving payment:", error);
+    console.error("Payment processing error:", error);
+    alert("Payment failed. Please try again.");
     return false;
   }
 }
 
-// Updated payment selection
-async function selectPayment(method) {
-  if (method === "CREDIT" || method === "DEBIT") {
-    document.getElementById("payment-page").style.display = "none";
-    document.getElementById("barcode-scan-page").style.display = "block";
-  } else {
-    const success = await completePayment(method);
-    if (success) {
-      document.getElementById("payment-page").style.display = "none";
-      document.getElementById("bill-page").style.display = "block";
-      displayBill();
-    } else {
-      alert("Payment failed. Please try again.");
-    }
+// Bill display and SMS
+function displayBill() {
+  const billItemsElement = document.getElementById("bill-items");
+  const billTotalElement = document.getElementById("bill-total-value");
+
+  if (billItemsElement && billTotalElement) {
+    billItemsElement.innerHTML = "";
+    cart.forEach(item => {
+      const itemElement = document.createElement("div");
+      itemElement.innerHTML = `
+        <p>${PRICES[item.label].description} = $${item.price.toFixed(2)} x ${item.quantity}</p>
+        <p>$${(item.price * item.quantity).toFixed(2)}</p>
+      `;
+      billItemsElement.appendChild(itemElement);
+    });
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    billTotalElement.textContent = total.toFixed(2);
   }
 }
 
-// Updated SMS function to include Firestore reference
+// SMS functionality
 async function sendBillViaSMS() {
   const phoneNumber = document.getElementById('phone-number').value.trim();
   
-  if (!isValidSriLankanPhoneNumber(phoneNumber)) {
-    alert('Please enter a valid 10-digit Sri Lankan phone number.');
+  if (!/^\d{10}$/.test(phoneNumber)) {
+    alert('Please enter a valid 10-digit phone number.');
     return;
   }
 
   try {
-    // Get the most recent bill
+    // Get most recent bill
     const billsQuery = await getDocs(
       query(collection(db, 'bills'), orderBy('timestamp', 'desc'), limit(1))
     );
     
     if (!billsQuery.empty) {
-      const billId = billsQuery.docs[0].id;
-      await updateDoc(doc(db, 'bills', billId), {
+      await updateDoc(doc(db, 'bills', billsQuery.docs[0].id), {
         phoneNumber: phoneNumber
       });
     }
 
-    // Rest of your Twilio SMS code...
-    const billItems = cart.map(item => 
+    // Send SMS
+    const billMessage = `Your Bill:\n${cart.map(item => 
       `${PRICES[item.label].description} - $${item.price.toFixed(2)} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`
-    ).join('\n');
-    
-    const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
-    const billMessage = `Your Bill:\n${billItems}\nTotal: $${totalAmount}`;
+    ).join('\n')}\nTotal: $${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`;
 
     const response = await fetch('https://api.twilio.com/2010-04-01/Accounts/' + TWILIO_ACCOUNT_SID + '/Messages.json', {
       method: 'POST',
@@ -177,15 +262,13 @@ async function sendBillViaSMS() {
       }),
     });
 
-    if (!response.ok) throw new Error('Failed to send SMS.');
-    alert('Bill sent successfully via SMS!');
+    if (!response.ok) throw new Error('SMS failed');
+    alert('Bill sent via SMS!');
   } catch (error) {
-    console.error('Error:', error);
-    alert('Failed to process bill. Please try again.');
+    console.error('SMS error:', error);
+    alert('Failed to send SMS. Please try again.');
   }
 }
-
-// [Keep all your other existing functions unchanged]
 
 // Initialize the app
 fetchData(FEEDS.CAMERA, "camera-image");
@@ -194,3 +277,42 @@ setInterval(() => {
   fetchData(FEEDS.CAMERA, "camera-image");
   fetchData(FEEDS.LABEL, "label-data");
 }, 5000);
+
+// Make functions available globally
+window.increaseQuantity = function(label) {
+  const item = cart.find(item => item.label === label);
+  if (item) {
+    item.quantity += 1;
+    updateCartList();
+    updateTotalAmount();
+  }
+};
+
+window.decreaseQuantity = function(label) {
+  const item = cart.find(item => item.label === label);
+  if (item) {
+    item.quantity -= 1;
+    if (item.quantity === 0) {
+      cart = cart.filter(item => item.label !== label);
+    }
+    updateCartList();
+    updateTotalAmount();
+  }
+};
+
+window.selectPayment = selectPayment;
+window.appendNumber = function(number) {
+  const input = document.getElementById('phone-number');
+  if (input.value.length < 10) input.value += number;
+};
+window.clearNumber = function() {
+  document.getElementById('phone-number').value = '';
+};
+window.sendBillViaSMS = sendBillViaSMS;
+window.goBackToDashboard = function() {
+  cart = [];
+  updateCartList();
+  updateTotalAmount();
+  document.getElementById("bill-page").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+};
