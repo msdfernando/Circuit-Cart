@@ -1,390 +1,365 @@
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  
-  header {
-    background-color: #000000;
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
-  }
-  
-  header h1 {
-    margin: 0;
-    font-size: 2em;
-  }
-  
-  .logo {
-    width: 80px; 
-    height: auto; 
-  }
-  
-  /* Main Layout */
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background-color: #000000;
+  color: #fff;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
+}
+
+/* Main Layout */
+main {
+  display: flex;
+  flex: 1;
+  padding: 20px;
+  gap: 20px;
+}
+
+.left-section {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right-section {
+  flex: 1;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Camera Feed */
+#camera-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* Label Feed */
+#label-data {
+  font-size: 1.2em;
+  color: #000000;
+}
+
+/* Cart List */
+#cart-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  max-height: 200px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+#cart-list div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+#cart-list div p {
+  margin: 0;
+  flex: 1;
+}
+
+/* Quantity Controls */
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-controls button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #000000;
+  color: #fff;
+  cursor: pointer;
+}
+
+.quantity-controls button:hover {
+  background-color: #333;
+}
+
+.quantity-controls span {
+  font-size: 1.2em;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Total Amount */
+#total-amount {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+#pay-button {
+  background-color: #28a745;
+  color: #fff;
+}
+
+#pay-button:hover {
+  background-color: #218838;
+}
+
+#cancel-button {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+#cancel-button:hover {
+  background-color: #c82333;
+}
+
+/* Footer */
+footer {
+  background-color: #000000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  margin-top: auto;
+}
+
+/* Payment Page Styles */
+#payment-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.payment-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.payment-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.payment-card:hover {
+  background-color: #f0f0f0;
+}
+
+.payment-card img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.payment-card p {
+  margin: 0;
+  font-size: 1em;
+  text-align: center;
+}
+
+/* Bill Page Styles */
+#bill-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.bill-container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+  flex: 1;
+}
+
+/* Left Side: Bill Details */
+.bill-details {
+  flex: 1;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#bill-items {
+  margin-bottom: 20px;
+}
+
+#bill-items div {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+#bill-total {
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: right;
+}
+
+/* Right Side: Number Pad and Mobile Number Input */
+.number-pad-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#phone-number {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.2em;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.number-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.number-pad button {
+  padding: 20px;
+  font-size: 1.5em;
+  border: none;
+  border-radius: 10px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.number-pad button:hover {
+  background-color: #ddd;
+}
+
+.number-pad button:active {
+  background-color: #ccc;
+}
+
+/* Bill Page Header */
+#bill-page header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #000000;
+  color: #fff;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+#bill-page header h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+#bill-page header button {
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: #fff;
+  cursor: pointer;
+}
+
+#bill-page header button:hover {
+  background-color: #218838;
+}
+
+/* Responsive Styles */
+@media (max-width: 800px) {
   main {
-    display: flex;
-    flex: 1;
-    padding: 20px;
-    gap: 20px;
-  }
-  
-  .left-section {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .right-section {
-    flex: 1;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Camera Feed */
-  #camera-image {
-    max-width: 100%;
-    height: auto;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-  }
-  
-  /* Label Feed */
-  #label-data {
-    font-size: 1.2em;
-    color: #000000;
-  }
-  
-  /* Cart List */
-  #cart-list {
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 20px;
-    max-height: 200px; /* Limit cart list height */
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px;
-  }
-  
-  #cart-list div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  #cart-list div p {
-    margin: 0;
-    flex: 1;
-  }
-  
-  /* Quantity Controls */
-  .quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .quantity-controls button {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: #000000;
-    color: #fff;
-    cursor: pointer;
-  }
-  
-  .quantity-controls button:hover {
-    background-color: #000000;
-  }
-  
-  .quantity-controls button:last-child {
-    background-color: #000000;
-  }
-  
-  .quantity-controls button:last-child:hover {
-    background-color: #000000;
-  }
-  
-  .quantity-controls span {
-    font-size: 1.2em;
-    min-width: 20px;
-    text-align: center;
-  }
-  
-  /* Total Amount */
-  #total-amount {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 20px;
-  }
-  
-  /* Buttons */
-  .buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: auto;
-  }
-  
-  .buttons button {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-  }
-  
-  #pay-button {
-    background-color: #28a745;
-    color: #fff;
-  }
-  
-  #pay-button:hover {
-    background-color: #218838;
-  }
-  
-  #cancel-button {
-    background-color: #dc3545;
-    color: #fff;
-  }
-  
-  #cancel-button:hover {
-    background-color: #c82333;
-  }
-  
-  /* Footer */
-  footer {
-    background-color: #000000;
-    color: #fff;
-    text-align: center;
-    padding: 5px 0;
-    margin-top: auto;
-  }
-  
-  /* Payment Page Styles */
-  #payment-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
-  
-  .payment-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-  }
-  
-  .payment-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 150px; /* Adjust the width as needed */
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .payment-card:hover {
-    background-color: #f0f0f0;
-  }
-  
-  .payment-card img {
-    width: 80px; /* Adjust the width of the images */
-    height: 80px; /* Adjust the height of the images */
-    object-fit: contain; /* Ensure the image fits within the dimensions */
-    margin-bottom: 10px;
-  }
-  
-  .payment-card p {
-    margin: 0;
-    font-size: 1em;
-    text-align: center;
-  }
-  
-  /* Bill Page Styles */
-  #bill-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    min-height: 100vh; /* Ensure the page takes full height */
-  }
-  
-  .bill-container {
-    display: flex;
-    gap: 20px;
-    width: 100%;
-    max-width: 800px;
-    flex: 1; /* Allow the container to grow and take available space */
-  }
-  
-  /* Left Side: Bill Details */
-  .bill-details {
-    flex: 1;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  #bill-items {
-    margin-bottom: 20px;
-  }
-  
-  #bill-items div {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  #bill-total {
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: right;
-  }
-  
-  /* Right Side: Number Pad and Mobile Number Input */
-  .number-pad-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  #phone-number {
-    width: 100%;
-    padding: 10px;
-    font-size: 1.2em;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  
-  .number-pad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  
-  .number-pad button {
-    padding: 20px;
-    font-size: 1.5em;
-    border: none;
-    border-radius: 10px;
-    background-color: #f0f0f0;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .number-pad button:hover {
-    background-color: #ddd;
-  }
-  
-  .number-pad button:active {
-    background-color: #ccc;
-  }
-  
-  /* Bill Page Header */
-  #bill-page header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #000000;
-    color: #fff;
-    padding: 10px 20px;
-    width: 100%;
-  }
-  
-  #bill-page header h1 {
-    margin: 0;
-    font-size: 2em;
-  }
-  
-  #bill-page header button {
-    padding: 10px 20px;
-    font-size: 1em;
-    border: none;
-    border-radius: 5px;
-    background-color: #28a745;
-    color: #fff;
-    cursor: pointer;
-  }
-  
-  #bill-page header button:hover {
-    background-color: #218838;
-  }
-  
-  /* Responsive Styles */
-  @media (max-width: 800px) {
-    main {
-      flex-direction: column; 
+      flex-direction: column;
       padding: 10px;
       gap: 10px;
-    }
-  
-    .left-section, .right-section {
-      width: 100%; 
-    }
-  
-    header h1 {
-      font-size: 1.5em;
-    }
-  
-    .logo {
-      width: 5px; 
-    }
-  
-    #cart-list {
+  }
+
+  .left-section, .right-section {
+      width: 100%;
+  }
+
+  #cart-list {
       max-height: 150px;
-    }
-  
-    .buttons button {
+  }
+
+  .buttons button {
       font-size: 0.9em;
-    }
-  
-    .payment-card {
-      width: 120px; 
-    }
-  
-    .payment-card img {
-      width: 60px; 
+  }
+
+  .payment-card {
+      width: 120px;
+  }
+
+  .payment-card img {
+      width: 60px;
       height: 60px;
-    }
   }
-  
-  @media (max-width: 480px) {
-    header h1 {
-      font-size: 1.2em;
-    }
-  
-    .buttons button {
-      padding: 8px; 
-    }
-  
-    .payment-card {
-      width: 100px; 
-    }
-  
-    .payment-card img {
-      width: 50px; 
+}
+
+@media (max-width: 480px) {
+  .buttons button {
+      padding: 8px;
+  }
+
+  .payment-card {
+      width: 100px;
+  }
+
+  .payment-card img {
+      width: 50px;
       height: 50px;
-    }
   }
+}
