@@ -50,7 +50,7 @@
   </div>
 
   <!-- Payment Page -->
-  <div id="payment-page" style="display: none;">
+  <div id="payment-page">
     <header>
       <h1>Select Payment Method</h1>
     </header>
@@ -91,7 +91,7 @@
   </div>
 
   <!-- Barcode Scan Page -->
-  <div id="barcode-scan-page" style="display: none;">
+  <div id="barcode-scan-page">
     <header>
       <h1>Scan Your Card</h1>
     </header>
@@ -109,7 +109,7 @@
   </div>
 
   <!-- Bill/Receipt Page -->
-  <div id="bill-page" style="display: none;">
+  <div id="bill-page">
     <header>
       <h1>🎉 Payment Successful! 🎉</h1>
       <button onclick="goBackToDashboard()">Back to Home</button>
@@ -152,6 +152,9 @@
     </main>
   </div>
 
-  <script type="module" src="scripts/main.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="scripts/main.js"></script>
 </body>
 </html>
