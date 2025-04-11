@@ -20,8 +20,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// After CDN scripts are loaded
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // Adafruit IO credentials
 const ADAFRUIT_AIO_USERNAME = "Dilshan98";
