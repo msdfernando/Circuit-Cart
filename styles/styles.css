@@ -12,16 +12,11 @@
 
 /* Initial active page */
 #dashboard.page-active {
-  display: flex !important; /* Maintains your layout */
+  display: flex !important;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* Camera Feed Styling */
-#camera-image {
-  max-width: 100%;
-  border: 1px solid #ddd;
-  min-height: 200px;
-  background: #f5f5f5 url('assets/camera-placeholder.png') no-repeat center;
-}
 /* General Styles */
 body {
   font-family: Arial, sans-serif;
@@ -76,12 +71,19 @@ main {
   height: auto;
   border: 1px solid #ddd;
   border-radius: 8px;
+  min-height: 300px;
+  background: #f5f5f5 url('assets/camera-placeholder.png') no-repeat center;
+  background-size: contain;
 }
 
 /* Label Feed */
 #label-data {
   font-size: 1.2em;
   color: #000000;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Cart List */
@@ -89,13 +91,13 @@ main {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 20px;
-  max-height: 200px;
+  max-height: 300px;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 10px;
 }
 
-#cart-list div {
+.cart-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -103,7 +105,7 @@ main {
   border-bottom: 1px solid #ddd;
 }
 
-#cart-list div p {
+.cart-item p {
   margin: 0;
   flex: 1;
 }
@@ -190,6 +192,7 @@ footer {
   flex-direction: column;
   align-items: center;
   padding: 20px;
+  min-height: 100vh;
 }
 
 .payment-options {
@@ -197,6 +200,7 @@ footer {
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
+  margin-top: 20px;
 }
 
 .payment-card {
@@ -209,11 +213,12 @@ footer {
   border: 1px solid #ddd;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .payment-card:hover {
   background-color: #f0f0f0;
+  transform: scale(1.05);
 }
 
 .payment-card img {
@@ -229,12 +234,34 @@ footer {
   text-align: center;
 }
 
+/* Barcode Scan Page */
+#barcode-scan-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.barcode-scan-section {
+  width: 80%;
+  max-width: 500px;
+  text-align: center;
+}
+
+#barcode-input {
+  width: 100%;
+  padding: 15px;
+  font-size: 1.2em;
+  border: 2px solid #000;
+  border-radius: 8px;
+  text-align: center;
+}
+
 /* Bill Page Styles */
 #bill-page {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px;
   min-height: 100vh;
 }
 
@@ -242,7 +269,9 @@ footer {
   display: flex;
   gap: 20px;
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
   flex: 1;
 }
 
@@ -259,7 +288,7 @@ footer {
   margin-bottom: 20px;
 }
 
-#bill-items div {
+.bill-item {
   display: flex;
   justify-content: space-between;
   padding: 10px;
@@ -282,7 +311,7 @@ footer {
 
 #phone-number {
   width: 100%;
-  padding: 10px;
+  padding: 15px;
   font-size: 1.2em;
   text-align: center;
   border: 1px solid #ddd;
@@ -302,7 +331,7 @@ footer {
   border-radius: 10px;
   background-color: #f0f0f0;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .number-pad button:hover {
@@ -311,6 +340,7 @@ footer {
 
 .number-pad button:active {
   background-color: #ccc;
+  transform: scale(0.98);
 }
 
 /* Bill Page Header */
@@ -320,7 +350,7 @@ footer {
   align-items: center;
   background-color: #000000;
   color: #fff;
-  padding: 10px 20px;
+  padding: 20px;
   width: 100%;
 }
 
@@ -346,44 +376,55 @@ footer {
 /* Responsive Styles */
 @media (max-width: 800px) {
   main {
-      flex-direction: column;
-      padding: 10px;
-      gap: 10px;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
   }
 
   .left-section, .right-section {
-      width: 100%;
+    width: 100%;
+  }
+
+  .bill-container {
+    flex-direction: column;
   }
 
   #cart-list {
-      max-height: 150px;
+    max-height: 200px;
   }
 
   .buttons button {
-      font-size: 0.9em;
+    font-size: 0.9em;
   }
 
   .payment-card {
-      width: 120px;
+    width: 120px;
   }
 
   .payment-card img {
-      width: 60px;
-      height: 60px;
+    width: 60px;
+    height: 60px;
   }
 }
 
 @media (max-width: 480px) {
   .buttons button {
-      padding: 8px;
+    padding: 8px;
   }
 
   .payment-card {
-      width: 100px;
+    width: 100px;
+    padding: 10px;
   }
 
   .payment-card img {
-      width: 50px;
-      height: 50px;
+    width: 50px;
+    height: 50px;
+  }
+
+  #bill-page header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
   }
 }
