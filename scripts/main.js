@@ -105,10 +105,16 @@ function displayData(value, elementId) {
 }
 
 function displayImage(base64Data, elementId) {
-  const image = document.getElementById(elementId);
-  if (image) image.src = `data:image/jpeg;base64,${base64Data}`;
+  const imageElement = document.getElementById(elementId);
+  if (imageElement) {
+    // Ensure proper base64 prefix
+    if (!base64Data.startsWith("data:image/jpeg;base64,")) {
+      base64Data = "data:image/jpeg;base64," + base64Data;
+    }
+    imageElement.src = base64Data;
+    console.log("Image loaded:", base64Data.substring(0, 50) + "..."); // Debug
+  }
 }
-
 // Cart management functions
 function updateCart(label) {
   const normalizedLabel = label.trim().toUpperCase();
