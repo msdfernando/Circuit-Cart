@@ -1,3 +1,27 @@
+/* Page Visibility Control */
+#dashboard,
+#payment-page,
+#barcode-scan-page, 
+#bill-page {
+  display: none;
+}
+
+.page-active {
+  display: block !important;
+}
+
+/* Initial active page */
+#dashboard.page-active {
+  display: flex !important; /* Maintains your layout */
+}
+
+/* Camera Feed Styling */
+#camera-image {
+  max-width: 100%;
+  border: 1px solid #ddd;
+  min-height: 200px;
+  background: #f5f5f5 url('assets/camera-placeholder.png') no-repeat center;
+}
 /* General Styles */
 body {
   font-family: Arial, sans-serif;
