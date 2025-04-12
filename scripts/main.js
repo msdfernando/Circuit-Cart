@@ -99,38 +99,17 @@ async function fetchData(feedKey, elementId) {
   }
 }
 
-// Page Management
-function showPage(pageId) {
-  // Hide all pages
-  document.querySelectorAll('[id$="-page"]').forEach(page => {
-    page.classList.remove('page-active');
-  });
-  
-  // Show requested page
-  const page = document.getElementById(pageId);
-  if (page) {
-    page.classList.add('page-active');
-    
-    // Special handling for barcode page
-    if (pageId === 'barcode-scan-page') {
-      const input = document.getElementById('barcode-input');
-      if (input) input.focus();
-    }
-  }
-}
-
 // Display functions
 function displayData(value, elementId) {
   const element = document.getElementById(elementId);
   if (element) {
-    element.innerHTML = `Detected Object: <strong>${value}</strong>`;
+    element.innerHTML = `Detected: <strong>${value}</strong>`;
   }
 }
 
 function displayImage(base64Data, elementId) {
   const imageElement = document.getElementById(elementId);
   if (imageElement) {
-    // Ensure proper base64 formatting
     if (!base64Data.startsWith('data:image')) {
       base64Data = `data:image/jpeg;base64,${base64Data}`;
     }
@@ -142,7 +121,7 @@ function displayImage(base64Data, elementId) {
   }
 }
 
-// Cart management functions
+// Cart management
 function updateCart(label) {
   const normalizedLabel = label.trim().toUpperCase();
   
@@ -171,12 +150,13 @@ function updateCartList() {
       const itemElement = document.createElement("div");
       itemElement.className = "cart-item";
       itemElement.innerHTML = `
-        <p>${PRICES[item.label].description} - $${item.price.toFixed(2)}</p>
+        <p>${PRICES[item.label].description}</p>
         <div class="quantity-controls">
+          <button onclick="decreaseQuantity('${item.label}')">-</button>
           <span>${item.quantity}</span>
           <button onclick="increaseQuantity('${item.label}')">+</button>
-          <button onclick="decreaseQuantity('${item.label}')">-</button>
         </div>
+        <p>$${(item.price * item.quantity).toFixed(2)}</p>
       `;
       cartElement.appendChild(itemElement);
     });
@@ -216,7 +196,7 @@ async function completePayment(paymentMethod) {
   }
 }
 
-// Bill display and SMS
+// Bill display
 function displayBill() {
   const billItemsElement = document.getElementById("bill-items");
   const billTotalElement = document.getElementById("bill-total-value");
@@ -269,6 +249,26 @@ async function sendBillViaSMS() {
   } catch (error) {
     console.error('SMS error:', error);
     alert('Failed to send SMS. Please try again.');
+  }
+}
+
+// Page Navigation
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
+  
+  const page = document.getElementById(pageId);
+  if (page) {
+    page.classList.add('active');
+    
+    if (pageId === 'barcode-scan-page') {
+      const input = document.getElementById('barcode-input');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+    }
   }
 }
 
@@ -326,21 +326,29 @@ window.goBackToDashboard = function() {
   showPage("dashboard");
 };
 
-// Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  // Set up event listeners
-  document.getElementById("pay-button").addEventListener("click", () => showPage("payment-page"));
-  document.getElementById("cancel-button").addEventListener("click", () => {
-    cart = [];
-    updateCartList();
-    updateTotalAmount();
-    showPage("dashboard");
-  });
+// Barcode scanner simulation
+document.addEventListener('DOMContentLoaded', function() {
+  const barcodeInput = document.getElementById('barcode-input');
+  if (barcodeInput) {
+    barcodeInput.addEventListener('input', function() {
+      if (this.value.length >= 12) { // Simulate successful scan
+        setTimeout(() => {
+          completePayment("CREDIT").then(success => {
+            if (success) {
+              showPage("bill-page");
+              displayBill();
+            }
+          });
+        }, 500);
+      }
+    });
+  }
 
-  // Load products
+  // Initialize app
   loadProducts();
-
-  // Start fetching data
+  showPage("dashboard");
+  
+  // Start data fetching
   fetchData(FEEDS.CAMERA, "camera-image");
   fetchData(FEEDS.LABEL, "label-data");
   
