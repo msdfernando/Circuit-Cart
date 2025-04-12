@@ -1,35 +1,4 @@
 /* Page Visibility Control */
-#dashboard,
-#payment-page,
-#barcode-scan-page, 
-#bill-page {
-  display: none;
-}
-
-.page-active {
-  display: block !important;
-}
-
-/* Initial active page */
-#dashboard.page-active {
-  display: flex !important;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* General Styles */
-/* Page System */
-/* Base Styles */
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  position: relative;
-  background-color: #f4f4f4;
-}
-
-/* Page System */
 .page {
   position: fixed;
   top: 0;
@@ -39,6 +8,7 @@ body {
   overflow-y: auto;
   display: none;
   flex-direction: column;
+  background-color: #f4f4f4;
 }
 
 .page.active {
@@ -64,13 +34,19 @@ header h1 {
   font-size: 1.5em;
 }
 
-header button {
+.header-button {
   background: none;
   border: none;
   color: white;
   font-size: 1.5em;
   cursor: pointer;
   padding: 5px;
+  width: 48px;
+  text-align: center;
+}
+
+.header-spacer {
+  width: 48px;
 }
 
 /* Main Content */
@@ -109,6 +85,10 @@ main {
   max-height: 300px;
   border-radius: 5px;
   background-color: #eee;
+  background-image: url('assets/camera-placeholder.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
 /* Label Feed */
@@ -161,6 +141,7 @@ main {
   border-radius: 5px;
   font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 #pay-button {
@@ -168,9 +149,17 @@ main {
   color: white;
 }
 
+#pay-button:hover {
+  background-color: #218838;
+}
+
 #cancel-button {
   background-color: #dc3545;
   color: white;
+}
+
+#cancel-button:hover {
+  background-color: #c82333;
 }
 
 /* Payment Options */
@@ -189,11 +178,12 @@ main {
   border-radius: 10px;
   background-color: white;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.2s;
 }
 
 .payment-card:hover {
   transform: scale(1.03);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .payment-card img {
@@ -226,6 +216,7 @@ main {
 .scan-instructions {
   text-align: center;
   color: #666;
+  margin-top: 10px;
 }
 
 /* Bill Page */
@@ -256,6 +247,15 @@ main {
   border-radius: 10px;
   background-color: #f0f0f0;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.number-pad button:hover {
+  background-color: #ddd;
+}
+
+.number-pad button:active {
+  transform: scale(0.95);
 }
 
 #phone-number {
@@ -297,5 +297,21 @@ footer {
   
   .bill-container {
     flex-direction: row;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .payment-card {
+    flex-direction: row;
+    gap: 15px;
+    text-align: left;
+  }
+  
+  .payment-card img {
+    margin-bottom: 0;
   }
 }
