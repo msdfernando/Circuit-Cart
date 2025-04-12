@@ -34,19 +34,19 @@ const FEEDS = {
   LABEL: "label"
 };
 
-// Cart and product variables
-let cart = [];
-let PRICES = {};
-
 // Twilio credentials
 const TWILIO_ACCOUNT_SID = 'AC9802b8b790a4dae149be9a52a2c67620';
 const TWILIO_AUTH_TOKEN = '6aa01d546c7800614c6e791e298b8fbd';
 const TWILIO_PHONE_NUMBER = '+18312783055';
 
+// Cart and product variables
+let cart = [];
+let PRICES = {};
+
 // Load products from Firestore
 async function loadProducts() {
   try {
-    const snapshot = await getDocs(collection(db, 'products'));
+    const snapshot = await firebase.firestore().collection('products').get();
     PRICES = {};
     snapshot.forEach((doc) => {
       const data = doc.data();
@@ -97,22 +97,46 @@ async function fetchData(feedKey, elementId) {
     displayData("Error loading data", elementId);
   }
 }
+// Page Management
+function showPage(pageId) {
+  // Hide all pages
+  document.querySelectorAll('[id$="-page"]').forEach(page => {
+    page.classList.remove('page-active');
+  });
+  
+  // Show requested page
+  const page = document.getElementById(pageId);
+  if (page) {
+    page.classList.add('page-active');
+    
+    // Special handling for barcode page
+    if (pageId === 'barcode-scan-page') {
+      const input = document.getElementById('barcode-input');
+      if (input) input.focus();
+    }
+  }
+}
 
 // Display functions
 function displayData(value, elementId) {
   const element = document.getElementById(elementId);
-  if (element) element.innerHTML = `Detected Object: <strong>${value}</strong>`;
+  if (element) {
+    element.innerHTML = `Detected Object: <strong>${value}</strong>`;
+  }
 }
 
 function displayImage(base64Data, elementId) {
   const imageElement = document.getElementById(elementId);
   if (imageElement) {
-    // Ensure proper base64 prefix
-    if (!base64Data.startsWith("data:image/jpeg;base64,")) {
-      base64Data = "data:image/jpeg;base64," + base64Data;
+    // Ensure proper base64 formatting
+    if (!base64Data.startsWith('data:image')) {
+      base64Data = `data:image/jpeg;base64,${base64Data}`;
     }
+    imageElement.onerror = () => {
+      console.error("Failed to load image");
+      imageElement.src = 'assets/camera-placeholder.png';
+    };
     imageElement.src = base64Data;
-    console.log("Image loaded:", base64Data.substring(0, 50) + "..."); // Debug
   }
 }
 // Cart management functions
@@ -140,12 +164,13 @@ function updateCartList() {
     cartElement.innerHTML = "";
     cart.forEach(item => {
       const itemElement = document.createElement("div");
+      itemElement.className = "cart-item";
       itemElement.innerHTML = `
         <p>${PRICES[item.label].description} - $${item.price.toFixed(2)}</p>
         <div class="quantity-controls">
           <span>${item.quantity}</span>
-          <button onclick="increaseQuantity('${item.label}')">+</button>
-          <button onclick="decreaseQuantity('${item.label}')">-</button>
+          <button onclick="window.increaseQuantity('${item.label}')">+</button>
+          <button onclick="window.decreaseQuantity('${item.label}')">-</button>
         </div>
       `;
       cartElement.appendChild(itemElement);
@@ -191,7 +216,7 @@ async function completePayment(paymentMethod) {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
   try {
-    await addDoc(collection(db, 'bills'), {
+    await firebase.firestore().collection('bills').add({
       items: cart.map(item => ({
         name: item.label,
         price: item.price,
@@ -200,7 +225,7 @@ async function completePayment(paymentMethod) {
       })),
       total: total,
       paymentMethod: paymentMethod,
-      timestamp: serverTimestamp(),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       status: 'completed'
     });
     return true;
@@ -220,6 +245,7 @@ function displayBill() {
     billItemsElement.innerHTML = "";
     cart.forEach(item => {
       const itemElement = document.createElement("div");
+      itemElement.className = "bill-item";
       itemElement.innerHTML = `
         <p>${PRICES[item.label].description} = $${item.price.toFixed(2)} x ${item.quantity}</p>
         <p>$${(item.price * item.quantity).toFixed(2)}</p>
