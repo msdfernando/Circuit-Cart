@@ -291,14 +291,28 @@ async function sendBillViaSMS() {
     alert('Failed to send SMS. Please try again.');
   }
 }
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize products
+  loadProducts();
+  
+  // Set up event listeners
+  document.getElementById("pay-button").addEventListener("click", () => showPage("payment-page"));
+  document.getElementById("cancel-button").addEventListener("click", () => {
+    cart = [];
+    updateCartList();
+    updateTotalAmount();
+    showPage("dashboard");
+  });
+
 
 // Initialize the app
 fetchData(FEEDS.CAMERA, "camera-image");
-fetchData(FEEDS.LABEL, "label-data");
-setInterval(() => {
-  fetchData(FEEDS.CAMERA, "camera-image");
   fetchData(FEEDS.LABEL, "label-data");
-}, 5000);
+  setInterval(() => {
+    fetchData(FEEDS.CAMERA, "camera-image");
+    fetchData(FEEDS.LABEL, "label-data");
+  }, 5000);
+});
 
 // Make functions available globally
 window.increaseQuantity = function(label) {
@@ -309,6 +323,7 @@ window.increaseQuantity = function(label) {
     updateTotalAmount();
   }
 };
+
 
 window.decreaseQuantity = function(label) {
   const item = cart.find(item => item.label === label);
@@ -322,19 +337,34 @@ window.decreaseQuantity = function(label) {
   }
 };
 
-window.selectPayment = selectPayment;
+window.selectPayment = function(method) {
+  if (method === "CREDIT" || method === "DEBIT") {
+    showPage("barcode-scan-page");
+  } else {
+    completePayment(method).then(success => {
+      if (success) {
+        showPage("bill-page");
+        displayBill();
+      }
+    });
+  }
+};
+
 window.appendNumber = function(number) {
   const input = document.getElementById('phone-number');
-  if (input.value.length < 10) input.value += number;
+  if (input && input.value.length < 10) input.value += number;
 };
+
 window.clearNumber = function() {
-  document.getElementById('phone-number').value = '';
+  const input = document.getElementById('phone-number');
+  if (input) input.value = '';
 };
+
 window.sendBillViaSMS = sendBillViaSMS;
+
 window.goBackToDashboard = function() {
   cart = [];
   updateCartList();
   updateTotalAmount();
-  document.getElementById("bill-page").style.display = "none";
-  document.getElementById("dashboard").style.display = "block";
+  showPage("dashboard");
 };
