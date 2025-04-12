@@ -1,13 +1,3 @@
-// Import Firebase modules
-import { initializeApp } from "firebase/app";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  serverTimestamp,
-  getDocs
-} from "firebase/firestore";
-
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDoWvDT63Kd8xZUr1Lq0NNMiLjfQMOD0X0",
@@ -20,9 +10,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-// After CDN scripts are loaded
 const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db = firebase.firestore(app);
 
 // Adafruit IO credentials
 const ADAFRUIT_AIO_USERNAME = "Dilshan98";
@@ -46,7 +35,7 @@ let PRICES = {};
 // Load products from Firestore
 async function loadProducts() {
   try {
-    const snapshot = await firebase.firestore().collection('products').get();
+    const snapshot = await db.collection('products').get();
     PRICES = {};
     snapshot.forEach((doc) => {
       const data = doc.data();
@@ -68,9 +57,6 @@ async function loadProducts() {
   }
 }
 
-// Initialize products
-loadProducts();
-
 // Fetch data from Adafruit IO
 async function fetchData(feedKey, elementId) {
   const url = `https://io.adafruit.com/api/v2/${ADAFRUIT_AIO_USERNAME}/feeds/${feedKey}/data/last`;
@@ -82,21 +68,37 @@ async function fetchData(feedKey, elementId) {
       },
     });
 
-    if (!response.ok) throw new Error(`Failed to fetch data for feed: ${feedKey}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data for feed: ${feedKey}`);
+    }
 
     const data = await response.json();
+    console.log(`Feed ${feedKey} data:`, data);
+    
     if (feedKey === FEEDS.CAMERA) {
+      if (!data.value) {
+        throw new Error("No image data received");
+      }
       displayImage(data.value, elementId);
     } else {
+      if (!data.value) {
+        throw new Error("No label data received");
+      }
       console.log("Detected Label:", data.value);
       updateCart(data.value);
       displayData(data.value, elementId);
     }
   } catch (error) {
     console.error(`Error fetching data for feed ${feedKey}:`, error);
-    displayData("Error loading data", elementId);
+    displayData(`Error: ${error.message}`, elementId);
+    
+    // For camera, show placeholder
+    if (feedKey === FEEDS.CAMERA) {
+      document.getElementById(elementId).src = 'assets/camera-placeholder.png';
+    }
   }
 }
+
 // Page Management
 function showPage(pageId) {
   // Hide all pages
@@ -139,6 +141,7 @@ function displayImage(base64Data, elementId) {
     imageElement.src = base64Data;
   }
 }
+
 // Cart management functions
 function updateCart(label) {
   const normalizedLabel = label.trim().toUpperCase();
@@ -146,15 +149,17 @@ function updateCart(label) {
   if (PRICES[normalizedLabel]) {
     const existingItem = cart.find(item => item.label.toUpperCase() === normalizedLabel);
     
-    if (!existingItem) {
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
       cart.push({
         label: normalizedLabel,
         price: PRICES[normalizedLabel].price,
         quantity: 1,
       });
-      updateCartList();
-      updateTotalAmount();
     }
+    updateCartList();
+    updateTotalAmount();
   }
 }
 
@@ -169,8 +174,8 @@ function updateCartList() {
         <p>${PRICES[item.label].description} - $${item.price.toFixed(2)}</p>
         <div class="quantity-controls">
           <span>${item.quantity}</span>
-          <button onclick="window.increaseQuantity('${item.label}')">+</button>
-          <button onclick="window.decreaseQuantity('${item.label}')">-</button>
+          <button onclick="increaseQuantity('${item.label}')">+</button>
+          <button onclick="decreaseQuantity('${item.label}')">-</button>
         </div>
       `;
       cartElement.appendChild(itemElement);
@@ -187,36 +192,11 @@ function updateTotalAmount() {
 }
 
 // Payment processing
-document.getElementById("pay-button").addEventListener("click", () => {
-  document.getElementById("dashboard").style.display = "none";
-  document.getElementById("payment-page").style.display = "block";
-});
-
-document.getElementById("cancel-button").addEventListener("click", () => {
-  cart = [];
-  updateCartList();
-  updateTotalAmount();
-});
-
-async function selectPayment(method) {
-  if (method === "CREDIT" || method === "DEBIT") {
-    document.getElementById("payment-page").style.display = "none";
-    document.getElementById("barcode-scan-page").style.display = "block";
-  } else {
-    const success = await completePayment(method);
-    if (success) {
-      document.getElementById("payment-page").style.display = "none";
-      document.getElementById("bill-page").style.display = "block";
-      displayBill();
-    }
-  }
-}
-
 async function completePayment(paymentMethod) {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
   try {
-    await firebase.firestore().collection('bills').add({
+    await db.collection('bills').add({
       items: cart.map(item => ({
         name: item.label,
         price: item.price,
@@ -291,30 +271,8 @@ async function sendBillViaSMS() {
     alert('Failed to send SMS. Please try again.');
   }
 }
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize products
-  loadProducts();
-  
-  // Set up event listeners
-  document.getElementById("pay-button").addEventListener("click", () => showPage("payment-page"));
-  document.getElementById("cancel-button").addEventListener("click", () => {
-    cart = [];
-    updateCartList();
-    updateTotalAmount();
-    showPage("dashboard");
-  });
 
-
-// Initialize the app
-fetchData(FEEDS.CAMERA, "camera-image");
-  fetchData(FEEDS.LABEL, "label-data");
-  setInterval(() => {
-    fetchData(FEEDS.CAMERA, "camera-image");
-    fetchData(FEEDS.LABEL, "label-data");
-  }, 5000);
-});
-
-// Make functions available globally
+// Global functions
 window.increaseQuantity = function(label) {
   const item = cart.find(item => item.label === label);
   if (item) {
@@ -323,7 +281,6 @@ window.increaseQuantity = function(label) {
     updateTotalAmount();
   }
 };
-
 
 window.decreaseQuantity = function(label) {
   const item = cart.find(item => item.label === label);
@@ -368,3 +325,28 @@ window.goBackToDashboard = function() {
   updateTotalAmount();
   showPage("dashboard");
 };
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Set up event listeners
+  document.getElementById("pay-button").addEventListener("click", () => showPage("payment-page"));
+  document.getElementById("cancel-button").addEventListener("click", () => {
+    cart = [];
+    updateCartList();
+    updateTotalAmount();
+    showPage("dashboard");
+  });
+
+  // Load products
+  loadProducts();
+
+  // Start fetching data
+  fetchData(FEEDS.CAMERA, "camera-image");
+  fetchData(FEEDS.LABEL, "label-data");
+  
+  // Set up periodic refresh
+  setInterval(() => {
+    fetchData(FEEDS.CAMERA, "camera-image");
+    fetchData(FEEDS.LABEL, "label-data");
+  }, 5000);
+});
