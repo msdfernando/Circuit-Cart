@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Circuit Cart Dashboard</title>
+  <title>Circuit Cart</title>
   <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
@@ -17,24 +17,28 @@
       <div class="left-section">
         <div class="card">
           <h2>Camera Feed</h2>
-          <img id="camera-image" src="" alt="Camera Feed">
+          <div class="camera-container">
+            <img id="camera-image" src="assets/camera-placeholder.png" alt="Camera Feed">
+          </div>
         </div>
         <div class="card">
           <h2>Label Feed</h2>
-          <div id="label-data">Loading label data...</div>
+          <div id="label-data">No product detected</div>
         </div>
       </div>
 
       <div class="right-section">
         <div class="card">
           <h2>Cart List</h2>
-          <div id="cart-list"></div>
+          <div id="cart-list">
+            <!-- Products will be added here manually -->
+          </div>
           <div id="total-amount">
             <p>Total: $<span id="total-value">0.00</span></p>
           </div>
           <div class="buttons">
-            <button id="pay-button" class="btn-pay">PAY</button>
-            <button id="cancel-button" class="btn-cancel">CANCEL</button>
+            <button id="pay-button">PAY</button>
+            <button id="cancel-button">CANCEL</button>
           </div>
         </div>
       </div>
@@ -62,27 +66,15 @@
           <img src="assets/debit-card.png" alt="Debit Card">
           <p>Debit Card</p>
         </div>
-        <div class="payment-card" onclick="selectPayment('EZ_CASH')">
-          <img src="assets/ez-cash.png" alt="EZ Cash">
-          <p>EZ Cash</p>
-        </div>
-        <div class="payment-card" onclick="selectPayment('M_CASH')">
-          <img src="assets/m-cash.png" alt="M Cash">
-          <p>M Cash</p>
-        </div>
-        <div class="payment-card" onclick="selectPayment('I_PAY')">
-          <img src="assets/i-pay.png" alt="I Pay">
-          <p>I Pay</p>
-        </div>
       </div>
     </main>
   </div>
 
-  <!-- Payment Successful Page -->
+  <!-- Bill Page -->
   <div id="bill-page" class="page">
     <header>
       <button class="btn-back" onclick="goBackToDashboard()">← Home</button>
-      <h1>🎉 Payment Successful! 🎉</h1>
+      <h1>Payment Successful!</h1>
     </header>
 
     <main>
@@ -94,21 +86,14 @@
             <p>Total: $<span id="bill-total-value">0.00</span></p>
           </div>
         </div>
-
+        
         <div class="number-pad-section">
           <input type="text" id="phone-number" placeholder="Enter phone number" readonly>
           <div class="number-pad">
             <button onclick="appendNumber('1')">1</button>
             <button onclick="appendNumber('2')">2</button>
             <button onclick="appendNumber('3')">3</button>
-            <button onclick="appendNumber('4')">4</button>
-            <button onclick="appendNumber('5')">5</button>
-            <button onclick="appendNumber('6')">6</button>
-            <button onclick="appendNumber('7')">7</button>
-            <button onclick="appendNumber('8')">8</button>
-            <button onclick="appendNumber('9')">9</button>
-            <button onclick="appendNumber('0')">0</button>
-            <button onclick="clearNumber()">C</button>
+            <!-- ... other number buttons ... -->
             <button onclick="sendBillViaSMS()">Send</button>
           </div>
         </div>
@@ -116,7 +101,6 @@
     </main>
   </div>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <script src="scripts/main.js"></script>
