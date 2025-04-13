@@ -1,17 +1,13 @@
-/* Base Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* ===== BASE STYLES ===== */
 body {
   font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
   background-color: #f4f4f4;
   min-height: 100vh;
 }
 
-/* Page System */
+/* ===== PAGE SYSTEM ===== */
 .page {
   position: fixed;
   top: 0;
@@ -27,23 +23,39 @@ body {
   display: flex;
 }
 
-/* Header Styles */
-header {
+/* ===== DASHBOARD PAGE ===== */
+#dashboard.page-active {
+  display: flex;
+}
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
   background-color: #000;
   color: white;
   padding: 15px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
 }
 
 /* Main Content */
-main {
+.main-content {
+  display: flex;
   flex: 1;
   padding: 20px;
-  display: flex;
   gap: 20px;
 }
 
-/* Dashboard Layout */
 .left-section {
   flex: 2;
   display: flex;
@@ -58,31 +70,47 @@ main {
   gap: 20px;
 }
 
-.card {
-  background-color: white;
+/* Camera Feed */
+.camera-feed {
+  background-color: #fff;
   border-radius: 8px;
   padding: 15px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Camera Feed */
 #camera-image {
   width: 100%;
-  height: 300px;
+  max-height: 300px;
   object-fit: contain;
-  background-color: #eee;
   border-radius: 5px;
+  background-color: #eee;
 }
 
 /* Label Feed */
-#label-data {
-  font-size: 1.2em;
-  padding: 10px;
+.label-feed {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Cart List */
+#label-data {
+  font-size: 1.2em;
+  color: #333;
+}
+
+/* Cart Section */
+.cart-section {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
 #cart-list {
-  max-height: 300px;
+  flex: 1;
   overflow-y: auto;
   margin: 10px 0;
 }
@@ -98,7 +126,7 @@ main {
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .quantity-controls button {
@@ -108,13 +136,14 @@ main {
   border-radius: 50%;
   background-color: #000;
   color: white;
+  font-weight: bold;
   cursor: pointer;
 }
 
 /* Buttons */
 .buttons {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   margin-top: 15px;
 }
 
@@ -125,28 +154,40 @@ main {
   border-radius: 5px;
   font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.btn-pay {
+#pay-button {
   background-color: #28a745;
   color: white;
 }
 
-.btn-cancel {
+#pay-button:hover {
+  background-color: #218838;
+}
+
+#cancel-button {
   background-color: #dc3545;
   color: white;
 }
 
-.btn-back {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.2em;
-  cursor: pointer;
-  padding: 5px 10px;
+#cancel-button:hover {
+  background-color: #c82333;
 }
 
-/* Payment Options */
+/* ===== PAYMENT PAGE ===== */
+#payment-page {
+  background-color: #f4f4f4;
+}
+
+.payment-header {
+  background-color: #000;
+  color: white;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+}
+
 .payment-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -155,18 +196,19 @@ main {
 }
 
 .payment-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: white;
   cursor: pointer;
   transition: transform 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .payment-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
 }
 
 .payment-card img {
@@ -176,46 +218,84 @@ main {
   margin-bottom: 10px;
 }
 
-/* Bill Page */
+/* ===== BARCODE SCAN PAGE ===== */
+#barcode-scan-page {
+  background-color: #f4f4f4;
+}
+
+.scan-header {
+  background-color: #000;
+  color: white;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.barcode-scan-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 20px;
+}
+
+#barcode-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 15px;
+  font-size: 1.2em;
+  text-align: center;
+  border: 2px solid #000;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* ===== BILL PAGE ===== */
+#bill-page {
+  background-color: #f4f4f4;
+}
+
+.bill-header {
+  background-color: #000;
+  color: white;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .bill-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  flex: 1;
   padding: 20px;
+  gap: 20px;
 }
 
 .bill-details {
-  background-color: white;
+  background-color: #fff;
   border-radius: 8px;
   padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 #bill-items {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .bill-item {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #eee;
 }
 
-/* Number Pad */
 .number-pad-section {
-  background-color: white;
+  background-color: #fff;
   border-radius: 8px;
   padding: 20px;
-}
-
-#phone-number {
-  width: 100%;
-  padding: 12px;
-  font-size: 1.2em;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .number-pad {
@@ -226,24 +306,48 @@ main {
 
 .number-pad button {
   padding: 15px;
-  font-size: 1.2em;
+  font-size: 1.5em;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   background-color: #f0f0f0;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-/* Footer */
-footer {
+.number-pad button:hover {
+  background-color: #ddd;
+}
+
+/* ===== FOOTER ===== */
+.footer {
   background-color: #000;
   color: white;
   text-align: center;
   padding: 10px;
+  font-size: 0.9em;
 }
 
-/* Responsive */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  main {
+  .main-content {
     flex-direction: column;
+  }
+  
+  .payment-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .buttons {
+    flex-direction: column;
+  }
+  
+  .buttons button {
+    width: 100%;
   }
 }
