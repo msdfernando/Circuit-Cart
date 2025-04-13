@@ -13,128 +13,71 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore(app);
 
-// Adafruit IO credentials
-const ADAFRUIT_AIO_USERNAME = "Dilshan98";
-const ADAFRUIT_AIO_KEY = "aio_PPJw298yJot4MbBwIhNKb2cQlSFU";
-
-// Feed keys
-const FEEDS = {
-  CAMERA: "camera",
-  LABEL: "label"
+// Product prices
+const PRICES = {
+  "SOORYA": { price: 20.00, description: "SOORYA Matches Box, Avg. Sticks 45" },
+  "IODEX": { price: 200.00, description: "IODEX Bam, 9g" },
+  "ZESTA": { price: 100.00, description: "ZESTA Green Tea, 2g" },
+  "T-SIPS": { price: 50.00, description: "T-SIPS Green Tea With Jasmine, 2g" }
 };
 
-// Twilio credentials
-const TWILIO_ACCOUNT_SID = 'AC9802b8b790a4dae149be9a52a2c67620';
-const TWILIO_AUTH_TOKEN = '6aa01d546c7800614c6e791e298b8fbd';
-const TWILIO_PHONE_NUMBER = '+18312783055';
-
-// Cart and product variables
 let cart = [];
-let PRICES = {};
+let lastDetectedItem = null;
 
-// Load products from Firestore
-async function loadProducts() {
-  try {
-    const snapshot = await db.collection('products').get();
-    PRICES = {};
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      PRICES[data.name.toUpperCase()] = {
-        price: data.price,
-        description: data.description
-      };
-    });
-    console.log("Products loaded successfully");
-  } catch (error) {
-    console.error("Error loading products:", error);
-    // Fallback to default prices
-    PRICES = {
-      SOORYA: { price: 20.00, description: "SOORYA Matches Box, Avg. Sticks 45" },
-      ZESTA: { price: 100.00, description: "ZESTA Green Tea, 2g" },
-      "T-SIPS": { price: 50.00, description: "T-SIPS Green Tea With Jasmine, 2g" },
-      IODEX: { price: 200.00, description: "IODEX Bam, 9g" }
-    };
-  }
-}
-
-// Fetch data from Adafruit IO
-async function fetchData(feedKey, elementId) {
-  const url = `https://io.adafruit.com/api/v2/${ADAFRUIT_AIO_USERNAME}/feeds/${feedKey}/data/last`;
-
-  try {
-    const response = await fetch(url, {
-      headers: {
-        "X-AIO-Key": ADAFRUIT_AIO_KEY,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch data for feed: ${feedKey}`);
-    }
-
-    const data = await response.json();
-    console.log(`Feed ${feedKey} data:`, data);
-    
-    if (feedKey === FEEDS.CAMERA) {
-      if (!data.value) {
-        throw new Error("No image data received");
-      }
-      displayImage(data.value, elementId);
+// Initialize the app
+document.addEventListener('DOMContentLoaded', () => {
+  // Set up event listeners
+  document.getElementById("pay-button").addEventListener("click", () => {
+    if (cart.length > 0) {
+      showPage("payment-page");
     } else {
-      if (!data.value) {
-        throw new Error("No label data received");
-      }
-      console.log("Detected Label:", data.value);
-      updateCart(data.value);
-      displayData(data.value, elementId);
+      alert("Your cart is empty!");
     }
-  } catch (error) {
-    console.error(`Error fetching data for feed ${feedKey}:`, error);
-    displayData(`Error: ${error.message}`, elementId);
-    
-    // For camera, show placeholder
-    if (feedKey === FEEDS.CAMERA) {
-      document.getElementById(elementId).src = 'assets/camera-placeholder.png';
-    }
+  });
+
+  document.getElementById("cancel-button").addEventListener("click", () => {
+    cart = [];
+    lastDetectedItem = null;
+    updateCartList();
+    updateTotalAmount();
+  });
+
+  // Simulate label detection (replace with your actual detection)
+  setInterval(() => {
+    const demoLabels = ["SOORYA", "IODEX", "ZESTA", "T-SIPS"];
+    const randomLabel = demoLabels[Math.floor(Math.random() * demoLabels.length)];
+    updateLabelFeed(randomLabel);
+  }, 3000);
+});
+
+// Update label feed display
+function updateLabelFeed(label) {
+  const labelElement = document.getElementById("label-data");
+  if (labelElement) {
+    labelElement.innerHTML = `Detected Object: <strong>${label}</strong>`;
+  }
+  // Only add to cart if it's a new detection
+  if (label !== lastDetectedItem) {
+    addToCart(label);
+    lastDetectedItem = label;
   }
 }
 
-// Display functions
-function displayData(value, elementId) {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.innerHTML = `Detected: <strong>${value}</strong>`;
-  }
-}
-
-function displayImage(base64Data, elementId) {
-  const imageElement = document.getElementById(elementId);
-  if (imageElement) {
-    if (!base64Data.startsWith('data:image')) {
-      base64Data = `data:image/jpeg;base64,${base64Data}`;
-    }
-    imageElement.onerror = () => {
-      console.error("Failed to load image");
-      imageElement.src = 'assets/camera-placeholder.png';
-    };
-    imageElement.src = base64Data;
-  }
-}
-
-// Cart management
-function updateCart(label) {
+// Add item to cart (only once per detection)
+function addToCart(label) {
   const normalizedLabel = label.trim().toUpperCase();
   
   if (PRICES[normalizedLabel]) {
-    const existingItem = cart.find(item => item.label.toUpperCase() === normalizedLabel);
+    const existingItem = cart.find(item => item.label === normalizedLabel);
     
     if (existingItem) {
-      existingItem.quantity += 1;
+      // Don't auto-increment, let user control with +/-
     } else {
       cart.push({
         label: normalizedLabel,
         price: PRICES[normalizedLabel].price,
         quantity: 1,
+        description: PRICES[normalizedLabel].description
       });
     }
     updateCartList();
@@ -142,6 +85,15 @@ function updateCart(label) {
   }
 }
 
+// Page navigation
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
+  document.getElementById(pageId).classList.add('active');
+}
+
+// Update cart display
 function updateCartList() {
   const cartElement = document.getElementById("cart-list");
   if (cartElement) {
@@ -150,129 +102,32 @@ function updateCartList() {
       const itemElement = document.createElement("div");
       itemElement.className = "cart-item";
       itemElement.innerHTML = `
-        <p>${PRICES[item.label].description}</p>
+        <span>${item.description} - $${item.price.toFixed(2)}</span>
         <div class="quantity-controls">
           <button onclick="decreaseQuantity('${item.label}')">-</button>
           <span>${item.quantity}</span>
           <button onclick="increaseQuantity('${item.label}')">+</button>
         </div>
-        <p>$${(item.price * item.quantity).toFixed(2)}</p>
       `;
       cartElement.appendChild(itemElement);
     });
   }
 }
 
+// Update total amount
 function updateTotalAmount() {
   const totalElement = document.getElementById("total-value");
-  if (totalElement) {
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    totalElement.textContent = total.toFixed(2);
-  }
-}
-
-// Payment processing
-async function completePayment(paymentMethod) {
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  
-  try {
-    await db.collection('bills').add({
-      items: cart.map(item => ({
-        name: item.label,
-        price: item.price,
-        quantity: item.quantity,
-        description: PRICES[item.label].description
-      })),
-      total: total,
-      paymentMethod: paymentMethod,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      status: 'completed'
-    });
-    return true;
-  } catch (error) {
-    console.error("Payment processing error:", error);
-    alert("Payment failed. Please try again.");
-    return false;
-  }
-}
-
-// Bill display
-function displayBill() {
-  const billItemsElement = document.getElementById("bill-items");
   const billTotalElement = document.getElementById("bill-total-value");
-
-  if (billItemsElement && billTotalElement) {
-    billItemsElement.innerHTML = "";
-    cart.forEach(item => {
-      const itemElement = document.createElement("div");
-      itemElement.className = "bill-item";
-      itemElement.innerHTML = `
-        <p>${PRICES[item.label].description} = $${item.price.toFixed(2)} x ${item.quantity}</p>
-        <p>$${(item.price * item.quantity).toFixed(2)}</p>
-      `;
-      billItemsElement.appendChild(itemElement);
-    });
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    billTotalElement.textContent = total.toFixed(2);
-  }
-}
-
-// SMS functionality
-async function sendBillViaSMS() {
-  const phoneNumber = document.getElementById('phone-number').value.trim();
   
-  if (!/^\d{10}$/.test(phoneNumber)) {
-    alert('Please enter a valid 10-digit phone number.');
-    return;
-  }
-
-  try {
-    const billMessage = `Your Bill:\n${cart.map(item => 
-      `${PRICES[item.label].description} - $${item.price.toFixed(2)} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`
-    ).join('\n')}\nTotal: $${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`;
-
-    const response = await fetch('https://api.twilio.com/2010-04-01/Accounts/' + TWILIO_ACCOUNT_SID + '/Messages.json', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Basic ' + btoa(TWILIO_ACCOUNT_SID + ':' + TWILIO_AUTH_TOKEN),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        'From': TWILIO_PHONE_NUMBER,
-        'To': `+94${phoneNumber}`,
-        'Body': billMessage,
-      }),
-    });
-
-    if (!response.ok) throw new Error('SMS failed');
-    alert('Bill sent via SMS!');
-  } catch (error) {
-    console.error('SMS error:', error);
-    alert('Failed to send SMS. Please try again.');
-  }
-}
-
-// Page Navigation
-function showPage(pageId) {
-  document.querySelectorAll('.page').forEach(page => {
-    page.classList.remove('active');
-  });
-  
-  const page = document.getElementById(pageId);
-  if (page) {
-    page.classList.add('active');
+  if (totalElement || billTotalElement) {
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    if (pageId === 'barcode-scan-page') {
-      const input = document.getElementById('barcode-input');
-      if (input) {
-        input.value = '';
-        input.focus();
-      }
-    }
+    if (totalElement) totalElement.textContent = total.toFixed(2);
+    if (billTotalElement) billTotalElement.textContent = total.toFixed(2);
   }
 }
 
-// Global functions
+// Quantity controls
 window.increaseQuantity = function(label) {
   const item = cart.find(item => item.label === label);
   if (item) {
@@ -283,33 +138,80 @@ window.increaseQuantity = function(label) {
 };
 
 window.decreaseQuantity = function(label) {
-  const item = cart.find(item => item.label === label);
-  if (item) {
-    item.quantity -= 1;
-    if (item.quantity === 0) {
-      cart = cart.filter(item => item.label !== label);
+  const itemIndex = cart.findIndex(item => item.label === label);
+  if (itemIndex !== -1) {
+    cart[itemIndex].quantity -= 1;
+    if (cart[itemIndex].quantity <= 0) {
+      cart.splice(itemIndex, 1);
+      lastDetectedItem = null; // Allow re-adding if scanned again
     }
     updateCartList();
     updateTotalAmount();
   }
 };
 
+// Payment processing
 window.selectPayment = function(method) {
   if (method === "CREDIT" || method === "DEBIT") {
-    showPage("barcode-scan-page");
+    // Simulate barcode scanning
+    setTimeout(() => {
+      completePayment(method);
+    }, 1500);
   } else {
-    completePayment(method).then(success => {
-      if (success) {
-        showPage("bill-page");
-        displayBill();
-      }
-    });
+    completePayment(method);
   }
 };
 
+async function completePayment(method) {
+  try {
+    // Save bill to Firestore
+    const billData = {
+      items: cart.map(item => ({
+        name: item.label,
+        price: item.price,
+        quantity: item.quantity,
+        description: item.description
+      })),
+      total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+      paymentMethod: method,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    await db.collection('bills').add(billData);
+    
+    // Display bill
+    displayBill();
+    showPage("bill-page");
+  } catch (error) {
+    console.error("Error saving bill:", error);
+    alert("Payment processing failed. Please try again.");
+  }
+}
+
+// Display bill
+function displayBill() {
+  const billItemsElement = document.getElementById("bill-items");
+  if (billItemsElement) {
+    billItemsElement.innerHTML = "";
+    cart.forEach(item => {
+      const itemElement = document.createElement("div");
+      itemElement.className = "bill-item";
+      itemElement.innerHTML = `
+        <span>${item.description} = $${item.price.toFixed(2)} x ${item.quantity}</span>
+        <span>$${(item.price * item.quantity).toFixed(2)}</span>
+      `;
+      billItemsElement.appendChild(itemElement);
+    });
+    updateTotalAmount();
+  }
+}
+
+// Number pad functions
 window.appendNumber = function(number) {
   const input = document.getElementById('phone-number');
-  if (input && input.value.length < 10) input.value += number;
+  if (input && input.value.length < 10) {
+    input.value += number;
+  }
 };
 
 window.clearNumber = function() {
@@ -317,44 +219,20 @@ window.clearNumber = function() {
   if (input) input.value = '';
 };
 
-window.sendBillViaSMS = sendBillViaSMS;
+window.sendBillViaSMS = function() {
+  const phoneNumber = document.getElementById('phone-number').value;
+  if (phoneNumber.length === 10) {
+    alert(`Bill sent to ${phoneNumber}`);
+    goBackToDashboard();
+  } else {
+    alert('Please enter a valid 10-digit phone number');
+  }
+};
 
 window.goBackToDashboard = function() {
   cart = [];
+  lastDetectedItem = null;
   updateCartList();
   updateTotalAmount();
   showPage("dashboard");
 };
-
-// Barcode scanner simulation
-document.addEventListener('DOMContentLoaded', function() {
-  const barcodeInput = document.getElementById('barcode-input');
-  if (barcodeInput) {
-    barcodeInput.addEventListener('input', function() {
-      if (this.value.length >= 12) { // Simulate successful scan
-        setTimeout(() => {
-          completePayment("CREDIT").then(success => {
-            if (success) {
-              showPage("bill-page");
-              displayBill();
-            }
-          });
-        }, 500);
-      }
-    });
-  }
-
-  // Initialize app
-  loadProducts();
-  showPage("dashboard");
-  
-  // Start data fetching
-  fetchData(FEEDS.CAMERA, "camera-image");
-  fetchData(FEEDS.LABEL, "label-data");
-  
-  // Set up periodic refresh
-  setInterval(() => {
-    fetchData(FEEDS.CAMERA, "camera-image");
-    fetchData(FEEDS.LABEL, "label-data");
-  }, 5000);
-});
