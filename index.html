@@ -7,12 +7,10 @@
   <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-  <!-- Main Dashboard -->
+  <!-- Dashboard Page -->
   <div id="dashboard" class="page active">
     <header>
-      <button class="header-button" onclick="showPage('dashboard')">☰</button>
       <h1>Circuit Cart</h1>
-      <div class="header-spacer"></div>
     </header>
 
     <main>
@@ -23,24 +21,20 @@
         </div>
         <div class="card">
           <h2>Label Feed</h2>
-          <div id="label-data">
-            <p>Loading label data...</p>
-          </div>
+          <div id="label-data">Loading label data...</div>
         </div>
       </div>
 
       <div class="right-section">
         <div class="card">
           <h2>Cart List</h2>
-          <div id="cart-list">
-            <!-- Cart items will be dynamically added here -->
-          </div>
+          <div id="cart-list"></div>
           <div id="total-amount">
             <p>Total: $<span id="total-value">0.00</span></p>
           </div>
           <div class="buttons">
-            <button id="pay-button">PAY</button>
-            <button id="cancel-button">CANCEL</button>
+            <button id="pay-button" class="btn-pay">PAY</button>
+            <button id="cancel-button" class="btn-cancel">CANCEL</button>
           </div>
         </div>
       </div>
@@ -51,89 +45,58 @@
     </footer>
   </div>
 
-  <!-- Payment Page -->
+  <!-- Payment Method Page -->
   <div id="payment-page" class="page">
     <header>
-      <button class="header-button" onclick="showPage('dashboard')">← Back</button>
+      <button class="btn-back" onclick="showPage('dashboard')">← Back</button>
       <h1>Select Payment Method</h1>
-      <div class="header-spacer"></div>
     </header>
 
     <main>
       <div class="payment-options">
         <div class="payment-card" onclick="selectPayment('CREDIT')">
-          <img src="assets/credit card.png" alt="Credit Card">
+          <img src="assets/credit-card.png" alt="Credit Card">
           <p>Credit Card</p>
         </div>
-
         <div class="payment-card" onclick="selectPayment('DEBIT')">
-          <img src="assets/debit card.png" alt="Debit Card">
+          <img src="assets/debit-card.png" alt="Debit Card">
           <p>Debit Card</p>
         </div>
-
         <div class="payment-card" onclick="selectPayment('EZ_CASH')">
-          <img src="assets/ez cash.png" alt="EZ Cash">
+          <img src="assets/ez-cash.png" alt="EZ Cash">
           <p>EZ Cash</p>
         </div>
-
         <div class="payment-card" onclick="selectPayment('M_CASH')">
-          <img src="assets/m cash.png" alt="M Cash">
+          <img src="assets/m-cash.png" alt="M Cash">
           <p>M Cash</p>
         </div>
-
         <div class="payment-card" onclick="selectPayment('I_PAY')">
-          <img src="assets/i pay.png" alt="I Pay">
+          <img src="assets/i-pay.png" alt="I Pay">
           <p>I Pay</p>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Barcode Scan Page -->
-  <div id="barcode-scan-page" class="page">
-    <header>
-      <button class="header-button" onclick="showPage('payment-page')">← Back</button>
-      <h1>Scan Your Card</h1>
-      <div class="header-spacer"></div>
-    </header>
-
-    <main>
-      <div class="barcode-scan-section">
-        <input
-          type="text"
-          id="barcode-input"
-          placeholder="Scan Debit/Credit Card"
-          autofocus
-        />
-        <p class="scan-instructions">Present your card's barcode to the scanner</p>
-      </div>
-    </main>
-  </div>
-
-  <!-- Bill/Receipt Page -->
+  <!-- Payment Successful Page -->
   <div id="bill-page" class="page">
     <header>
-      <button class="header-button" onclick="goBackToDashboard()">← Home</button>
+      <button class="btn-back" onclick="goBackToDashboard()">← Home</button>
       <h1>🎉 Payment Successful! 🎉</h1>
-      <div class="header-spacer"></div>
     </header>
 
     <main>
       <div class="bill-container">
         <div class="bill-details">
           <h2>Your Bill</h2>
-          <div id="bill-items">
-            <!-- Bill items will be dynamically added here -->
-          </div>
+          <div id="bill-items"></div>
           <div id="bill-total">
             <p>Total: $<span id="bill-total-value">0.00</span></p>
           </div>
         </div>
 
         <div class="number-pad-section">
-          <div>
-            <input type="text" id="phone-number" placeholder="Enter phone number" readonly />
-          </div>
+          <input type="text" id="phone-number" placeholder="Enter phone number" readonly>
           <div class="number-pad">
             <button onclick="appendNumber('1')">1</button>
             <button onclick="appendNumber('2')">2</button>
