@@ -1,128 +1,140 @@
-/* Reset & Base Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* General Styles */
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
-/* Page System */
-.page {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  display: none;
-  flex-direction: column;
-}
-
-.page.active {
-  display: flex;
-}
-
-/* Header */
 header {
-  background-color: #000;
-  color: white;
-  padding: 15px;
+  background-color: #000000;
+  color: #fff;
+  padding: 10px 0;
   text-align: center;
 }
 
-/* Main Content */
+header h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+.logo {
+  width: 80px; 
+  height: auto; 
+}
+
+/* Main Layout */
 main {
   display: flex;
   flex: 1;
-  padding: 15px;
-  gap: 15px;
+  padding: 20px;
+  gap: 20px;
 }
 
 .left-section {
   flex: 2;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
 .right-section {
   flex: 1;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
 }
 
-.card {
-  background: white;
-  border-radius: 5px;
-  padding: 15px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
 /* Camera Feed */
-.camera-container {
-  width: 100%;
-  height: 250px;
-  background: #eee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
 #camera-image {
   max-width: 100%;
-  max-height: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
 }
 
 /* Label Feed */
 #label-data {
-  padding: 15px;
-  background: white;
-  border-radius: 5px;
-  min-height: 60px;
+  font-size: 1.2em;
+  color: #000000;
 }
 
 /* Cart List */
 #cart-list {
-  max-height: 200px;
+  flex: 1;
   overflow-y: auto;
-  margin: 10px 0;
+  margin-bottom: 20px;
+  max-height: 200px; /* Limit cart list height */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
 }
 
-.cart-item {
+#cart-list div {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
 }
 
+#cart-list div p {
+  margin: 0;
+  flex: 1;
+}
+
+/* Quantity Controls */
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
 }
 
 .quantity-controls button {
-  width: 25px;
-  height: 25px;
+  padding: 5px 10px;
   border: none;
-  border-radius: 50%;
-  background: #000;
-  color: white;
+  border-radius: 5px;
+  background-color: #000000;
+  color: #fff;
   cursor: pointer;
+}
+
+.quantity-controls button:hover {
+  background-color: #000000;
+}
+
+.quantity-controls button:last-child {
+  background-color: #000000;
+}
+
+.quantity-controls button:last-child:hover {
+  background-color: #000000;
+}
+
+.quantity-controls span {
+  font-size: 1.2em;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Total Amount */
+#total-amount {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 /* Buttons */
 .buttons {
   display: flex;
   gap: 10px;
-  margin-top: 15px;
+  margin-top: auto;
 }
 
 .buttons button {
@@ -130,49 +142,140 @@ main {
   padding: 10px;
   border: none;
   border-radius: 5px;
-  font-weight: bold;
   cursor: pointer;
+  font-size: 1em;
 }
 
 #pay-button {
-  background: #28a745;
-  color: white;
+  background-color: #28a745;
+  color: #fff;
+}
+
+#pay-button:hover {
+  background-color: #218838;
 }
 
 #cancel-button {
-  background: #dc3545;
-  color: white;
+  background-color: #dc3545;
+  color: #fff;
 }
 
-/* Payment Page */
-.payment-options {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+#cancel-button:hover {
+  background-color: #c82333;
+}
+
+/* Footer */
+footer {
+  background-color: #000000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  margin-top: auto;
+}
+
+/* Payment Page Styles */
+#payment-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
 }
 
-.payment-card {
-  background: white;
-  border-radius: 5px;
-  padding: 15px;
-  text-align: center;
-  cursor: pointer;
+.payment-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
 }
 
-/* Bill Page */
-.bill-container {
+.payment-card {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  align-items: center;
+  justify-content: center;
+  width: 150px; /* Adjust the width as needed */
   padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.bill-item {
+.payment-card:hover {
+  background-color: #f0f0f0;
+}
+
+.payment-card img {
+  width: 80px; /* Adjust the width of the images */
+  height: 80px; /* Adjust the height of the images */
+  object-fit: contain; /* Ensure the image fits within the dimensions */
+  margin-bottom: 10px;
+}
+
+.payment-card p {
+  margin: 0;
+  font-size: 1em;
+  text-align: center;
+}
+
+/* Bill Page Styles */
+#bill-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh; /* Ensure the page takes full height */
+}
+
+.bill-container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+  flex: 1; /* Allow the container to grow and take available space */
+}
+
+/* Left Side: Bill Details */
+.bill-details {
+  flex: 1;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#bill-items {
+  margin-bottom: 20px;
+}
+
+#bill-items div {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+#bill-total {
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: right;
+}
+
+/* Right Side: Number Pad and Mobile Number Input */
+.number-pad-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#phone-number {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.2em;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 5px;
 }
 
 .number-pad {
@@ -182,18 +285,106 @@ main {
 }
 
 .number-pad button {
-  padding: 15px;
+  padding: 20px;
+  font-size: 1.5em;
+  border: none;
+  border-radius: 10px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.number-pad button:hover {
+  background-color: #ddd;
+}
+
+.number-pad button:active {
+  background-color: #ccc;
+}
+
+/* Bill Page Header */
+#bill-page header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #000000;
+  color: #fff;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+#bill-page header h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+#bill-page header button {
+  padding: 10px 20px;
+  font-size: 1em;
   border: none;
   border-radius: 5px;
-  background: #f0f0f0;
+  background-color: #28a745;
+  color: #fff;
   cursor: pointer;
 }
 
-/* Footer */
-footer {
-  background: #000;
-  color: white;
-  text-align: center;
-  padding: 10px;
-  margin-top: auto;
+#bill-page header button:hover {
+  background-color: #218838;
+}
+
+/* Responsive Styles */
+@media (max-width: 800px) {
+  main {
+    flex-direction: column; 
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .left-section, .right-section {
+    width: 100%; 
+  }
+
+  header h1 {
+    font-size: 1.5em;
+  }
+
+  .logo {
+    width: 5px; 
+  }
+
+  #cart-list {
+    max-height: 150px;
+  }
+
+  .buttons button {
+    font-size: 0.9em;
+  }
+
+  .payment-card {
+    width: 120px; 
+  }
+
+  .payment-card img {
+    width: 60px; 
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.2em;
+  }
+
+  .buttons button {
+    padding: 8px; 
+  }
+
+  .payment-card {
+    width: 100px; 
+  }
+
+  .payment-card img {
+    width: 50px; 
+    height: 50px;
+  }
 }
