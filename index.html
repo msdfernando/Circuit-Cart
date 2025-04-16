@@ -94,27 +94,30 @@
   </div>
 
   <script type="module">
-    // Remove the FEEDS import and use string literals directly
+    // Update your imports to match exactly what's exported
     import { 
-      appendNumber, 
-      clearNumber, 
-      sendBillViaSMS, 
-      goBackToDashboard,
       fetchData,
       handlePayment,
-      updateCartList,
-      updateTotalAmount
+      goBackToDashboard,
+      sendBillViaSMS
     } from './scripts/main.js';
   
-    // Event listeners for number pad
+    // Number pad functions are now handled internally
     document.querySelectorAll('.num-btn').forEach(btn => {
-      btn.addEventListener('click', () => appendNumber(btn.dataset.number));
+      btn.addEventListener('click', () => {
+        const phoneNumberInput = document.getElementById('phone-number');
+        if (phoneNumberInput.value.length < 10) {
+          phoneNumberInput.value += btn.dataset.number;
+        }
+      });
     });
   
-    document.getElementById('clear-btn').addEventListener('click', clearNumber);
+    document.getElementById('clear-btn').addEventListener('click', () => {
+      document.getElementById('phone-number').value = '';
+    });
+  
+    // Rest of your event listeners
     document.getElementById('send-btn').addEventListener('click', sendBillViaSMS);
-    
-    // Other buttons
     document.getElementById('back-to-dashboard').addEventListener('click', goBackToDashboard);
     document.getElementById('pay-button').addEventListener('click', handlePayment);
     document.getElementById('cancel-button').addEventListener('click', () => {
@@ -123,7 +126,7 @@
       updateTotalAmount();
     });
   
-    // Initial fetch - USING STRING LITERALS DIRECTLY
+    // Initial fetch
     fetchData("camera", "camera-image");
     fetchData("label", "label-data");
     setInterval(() => {

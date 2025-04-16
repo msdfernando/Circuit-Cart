@@ -261,13 +261,10 @@ setInterval(() => {
 }, 5000);
 
 // Export functions
+// At the bottom of main.js, only export what's needed:
 export {
-  appendNumber,
-  clearNumber,
-  sendBillViaSMS,
-  goBackToDashboard,
   fetchData,
   handlePayment,
-  updateCartList,
-  updateTotalAmount
+  goBackToDashboard,
+  sendBillViaSMS
 };
