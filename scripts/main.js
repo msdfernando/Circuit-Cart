@@ -181,16 +181,30 @@ function updateCartList() {
   const cartElement = document.getElementById("cart-list");
   if (cartElement) {
     cartElement.innerHTML = "";
-    cart.forEach(item => {
+    cart.forEach((item) => {
       const itemElement = document.createElement("div");
       itemElement.innerHTML = `
         <p>${PRICES[item.label].description} - $${item.price.toFixed(2)}</p>
         <div class="quantity-controls">
           <span>${item.quantity}</span>
-          <button onclick="increaseQuantity('${item.label}')">+</button>
-          <button onclick="decreaseQuantity('${item.label}')">-</button>
-        </div>`;
+          <button class="increase-btn" data-label="${item.label}">+</button>
+          <button class="decrease-btn" data-label="${item.label}">-</button>
+        </div>
+      `;
       cartElement.appendChild(itemElement);
+    });
+
+    // Add event listeners for all quantity buttons
+    document.querySelectorAll('.increase-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        increaseQuantity(btn.dataset.label);
+      });
+    });
+
+    document.querySelectorAll('.decrease-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        decreaseQuantity(btn.dataset.label);
+      });
     });
   }
 }
