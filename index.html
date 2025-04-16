@@ -49,65 +49,6 @@
     </footer>
   </div>
 
-  <!-- Payment Page -->
-  <div id="payment-page" class="hidden">
-    <header>
-      <h1>Select Payment Method</h1>
-    </header>
-
-    <main>
-      <div class="payment-options">
-        <!-- Credit Card -->
-        <div class="payment-card" data-method="CREDIT">
-          <img src="assets/credit card.png" alt="Credit Card">
-          <p>Credit Card</p>
-        </div>
-
-        <!-- Debit Card -->
-        <div class="payment-card" data-method="DEBIT">
-          <img src="assets/debit card.png" alt="Debit Card">
-          <p>Debit Card</p>
-        </div>
-
-        <!-- EZ Cash -->
-        <div class="payment-card" data-method="EZ_CASH">
-          <img src="assets/ez cash.png" alt="EZ Cash">
-          <p>EZ Cash</p>
-        </div>
-
-        <!-- M Cash -->
-        <div class="payment-card" data-method="M_CASH">
-          <img src="assets/m cash.png" alt="M Cash">
-          <p>M Cash</p>
-        </div>
-
-        <!-- I Pay -->
-        <div class="payment-card" data-method="I_PAY">
-          <img src="assets/i pay.png" alt="I Pay">
-          <p>I Pay</p>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Barcode Scan Page -->
-  <div id="barcode-scan-page" class="hidden">
-    <header>
-      <h1>Scan Your Card</h1>
-    </header>
-
-    <main>
-      <div class="barcode-scan-section">
-        <input
-          type="text"
-          id="barcode-input"
-          placeholder="Scan Debit/Credit Card"
-          autofocus
-        />
-      </div>
-    </main>
-  </div>
-
   <!-- Bill/Receipt Page -->
   <div id="bill-page" class="hidden">
     <header>
@@ -158,11 +99,10 @@
       appendNumber, 
       clearNumber, 
       sendBillViaSMS, 
-      selectPayment, 
       goBackToDashboard,
-      handleBarcodeScan,
       fetchData,
-      FEEDS
+      FEEDS,
+      handlePayment
     } from './scripts/main.js';
 
     // Event listeners for number pad
@@ -173,18 +113,9 @@
     document.getElementById('clear-btn').addEventListener('click', clearNumber);
     document.getElementById('send-btn').addEventListener('click', sendBillViaSMS);
     
-    // Payment method selection
-    document.querySelectorAll('.payment-card').forEach(card => {
-      card.addEventListener('click', () => selectPayment(card.dataset.method));
-    });
-    
     // Other buttons
     document.getElementById('back-to-dashboard').addEventListener('click', goBackToDashboard);
-    document.getElementById('barcode-input').addEventListener('change', handleBarcodeScan);
-    document.getElementById('pay-button').addEventListener('click', () => {
-      document.getElementById("dashboard").style.display = "none";
-      document.getElementById("payment-page").style.display = "block";
-    });
+    document.getElementById('pay-button').addEventListener('click', handlePayment);
     document.getElementById('cancel-button').addEventListener('click', () => {
       cart = [];
       updateCartList();

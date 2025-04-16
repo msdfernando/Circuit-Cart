@@ -1,8 +1,8 @@
-// Import Firebase (must be at top)
+// Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-// Initialize Firebase (add after your Twilio constants)
+// Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDoWvDT63Kd8xZUr1Lq0NNMiLjfQMOD0X0",
   authDomain: "circuit-cart.firebaseapp.com",
@@ -41,7 +41,6 @@ const TWILIO_PHONE_NUMBER = '+18312783055';
 
 let cart = [];
 
-// ========== NEW FIREBASE FUNCTION ========== //
 async function saveBillToFirestore() {
   try {
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -65,39 +64,19 @@ async function saveBillToFirestore() {
   }
 }
 
-// ========== MODIFIED FUNCTIONS (Firestore added) ========== //
-async function selectPayment(method) {
-  alert(`Payment method selected: ${method}`);
-  if (method === "CREDIT" || method === "DEBIT") {
-    document.getElementById("payment-page").style.display = "none";
-    document.getElementById("barcode-scan-page").style.display = "block";
-  } else {
-    setTimeout(async () => {
-      if (await saveBillToFirestore()) {
-        document.getElementById("payment-page").style.display = "none";
-        document.getElementById("bill-page").style.display = "block";
-        displayBill();
-      }
-    }, 2000);
+async function handlePayment() {
+  if (cart.length === 0) {
+    alert("Your cart is empty!");
+    return;
   }
-}
 
-async function handleBarcodeScan(event) {
-  const scannedData = event.target.value.trim();
-  const paymentMethods = { "D11558691": "DEBIT", "4792099010898": "CREDIT" };
-  
-  if (paymentMethods[scannedData]) {
-    setTimeout(async () => {
-      if (await saveBillToFirestore()) {
-        document.getElementById("barcode-scan-page").style.display = "none";
-        document.getElementById("bill-page").style.display = "block";
-        displayBill();
-      }
-    }, 2000);
+  if (await saveBillToFirestore()) {
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("bill-page").style.display = "block";
+    displayBill();
   } else {
-    alert("Invalid card type. Please scan a valid card (Debit or Credit).");
+    alert("Failed to process payment. Please try again.");
   }
-  event.target.value = "";
 }
 
 async function sendBillViaSMS() {
@@ -139,7 +118,6 @@ async function sendBillViaSMS() {
   }
 }
 
-// ========== ALL YOUR ORIGINAL FUNCTIONS (unchanged) ========== //
 async function fetchData(feedKey, elementId) {
   const url = `https://io.adafruit.com/api/v2/${ADAFRUIT_AIO_USERNAME}/feeds/${feedKey}/data/last`;
   try {
@@ -272,14 +250,6 @@ function clearNumber() {
   document.getElementById('phone-number').value = '';
 }
 
-// Event listeners
-document.getElementById("pay-button").addEventListener("click", () => {
-  document.getElementById("dashboard").style.display = "none";
-  document.getElementById("payment-page").style.display = "block";
-});
-
-document.getElementById("barcode-input").addEventListener("change", handleBarcodeScan);
-
 // Initial fetch and polling
 fetchData(FEEDS.CAMERA, "camera-image");
 fetchData(FEEDS.LABEL, "label-data");
@@ -288,19 +258,17 @@ setInterval(() => {
   fetchData(FEEDS.LABEL, "label-data");    
 }, 5000);
 
-// At the end of main.js
+// Export functions
 export {
   appendNumber,
   clearNumber,
   sendBillViaSMS,
-  selectPayment,
   goBackToDashboard,
-  handleBarcodeScan,
   fetchData,
   FEEDS,
+  handlePayment,
   updateCartList,
   updateTotalAmount,
   increaseQuantity,
-  decreaseQuantity,
-  updateCartList
+  decreaseQuantity
 };
