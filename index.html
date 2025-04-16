@@ -58,31 +58,31 @@
     <main>
       <div class="payment-options">
         <!-- Credit Card -->
-        <div class="payment-card" onclick="selectPayment('CREDIT')">
+        <div class="payment-card" data-method="CREDIT">
           <img src="assets/credit card.png" alt="Credit Card">
           <p>Credit Card</p>
         </div>
 
         <!-- Debit Card -->
-        <div class="payment-card" onclick="selectPayment('DEBIT')">
+        <div class="payment-card" data-method="DEBIT">
           <img src="assets/debit card.png" alt="Debit Card">
           <p>Debit Card</p>
         </div>
 
         <!-- EZ Cash -->
-        <div class="payment-card" onclick="selectPayment('EZ_CASH')">
+        <div class="payment-card" data-method="EZ_CASH">
           <img src="assets/ez cash.png" alt="EZ Cash">
           <p>EZ Cash</p>
         </div>
 
         <!-- M Cash -->
-        <div class="payment-card" onclick="selectPayment('M_CASH')">
+        <div class="payment-card" data-method="M_CASH">
           <img src="assets/m cash.png" alt="M Cash">
           <p>M Cash</p>
         </div>
 
         <!-- I Pay -->
-        <div class="payment-card" onclick="selectPayment('I_PAY')">
+        <div class="payment-card" data-method="I_PAY">
           <img src="assets/i pay.png" alt="I Pay">
           <p>I Pay</p>
         </div>
@@ -108,49 +108,96 @@
     </main>
   </div>
 
- <!-- Bill/Receipt Page -->
-<div id="bill-page" class="hidden">
-  <header>
-    <h1>🎉 Payment Successful! 🎉</h1>
-    <button onclick="goBackToDashboard()">Back to Home</button>
-  </header>
+  <!-- Bill/Receipt Page -->
+  <div id="bill-page" class="hidden">
+    <header>
+      <h1>🎉 Payment Successful! 🎉</h1>
+      <button id="back-to-dashboard">Back to Home</button>
+    </header>
 
-  <main>
-    <div class="bill-container">
-      <!-- Left Side: Bill Details -->
-      <div class="bill-details">
-        <h2>Your Bill</h2>
-        <div id="bill-items">
-          <!-- Bill items will be dynamically added here -->
+    <main>
+      <div class="bill-container">
+        <!-- Left Side: Bill Details -->
+        <div class="bill-details">
+          <h2>Your Bill</h2>
+          <div id="bill-items">
+            <!-- Bill items will be dynamically added here -->
+          </div>
+          <div id="bill-total">
+            <p>Total: $<span id="bill-total-value">0.00</span></p>
+          </div>
         </div>
-        <div id="bill-total">
-          <p>Total: $<span id="bill-total-value">0.00</span></p>
+
+        <!-- Right Side: Number Pad and Mobile Number Input -->
+        <div class="number-pad-section">
+          <div>
+            <input type="text" id="phone-number" placeholder="Enter phone number" readonly />
+          </div>
+          <div class="number-pad">
+            <button class="num-btn" data-number="1">1</button>
+            <button class="num-btn" data-number="2">2</button>
+            <button class="num-btn" data-number="3">3</button>
+            <button class="num-btn" data-number="4">4</button>
+            <button class="num-btn" data-number="5">5</button>
+            <button class="num-btn" data-number="6">6</button>
+            <button class="num-btn" data-number="7">7</button>
+            <button class="num-btn" data-number="8">8</button>
+            <button class="num-btn" data-number="9">9</button>
+            <button class="num-btn" data-number="0">0</button>
+            <button id="clear-btn">C</button>
+            <button id="send-btn">Send</button>
+          </div>
         </div>
       </div>
+    </main>
+  </div>
 
-      <!-- Right Side: Number Pad and Mobile Number Input -->
-      <div class="number-pad-section">
-        <div>
-          <input type="text" id="phone-number" placeholder="Enter phone number" readonly />
-        </div>
-        <div class="number-pad">
-          <button onclick="appendNumber('1')">1</button>
-          <button onclick="appendNumber('2')">2</button>
-          <button onclick="appendNumber('3')">3</button>
-          <button onclick="appendNumber('4')">4</button>
-          <button onclick="appendNumber('5')">5</button>
-          <button onclick="appendNumber('6')">6</button>
-          <button onclick="appendNumber('7')">7</button>
-          <button onclick="appendNumber('8')">8</button>
-          <button onclick="appendNumber('9')">9</button>
-          <button onclick="appendNumber('0')">0</button>
-          <button onclick="clearNumber()">C</button>
-          <button onclick="sendBillViaSMS()">Send</button>
-        </div>
-      </div>
-    </div>
-  </main>
-</div>
-  <script src="scripts/main.js"></script>
+  <script type="module">
+    // Import your functions from main.js
+    import { 
+      appendNumber, 
+      clearNumber, 
+      sendBillViaSMS, 
+      selectPayment, 
+      goBackToDashboard,
+      handleBarcodeScan,
+      fetchData,
+      FEEDS
+    } from './scripts/main.js';
+
+    // Event listeners for number pad
+    document.querySelectorAll('.num-btn').forEach(btn => {
+      btn.addEventListener('click', () => appendNumber(btn.dataset.number));
+    });
+
+    document.getElementById('clear-btn').addEventListener('click', clearNumber);
+    document.getElementById('send-btn').addEventListener('click', sendBillViaSMS);
+    
+    // Payment method selection
+    document.querySelectorAll('.payment-card').forEach(card => {
+      card.addEventListener('click', () => selectPayment(card.dataset.method));
+    });
+    
+    // Other buttons
+    document.getElementById('back-to-dashboard').addEventListener('click', goBackToDashboard);
+    document.getElementById('barcode-input').addEventListener('change', handleBarcodeScan);
+    document.getElementById('pay-button').addEventListener('click', () => {
+      document.getElementById("dashboard").style.display = "none";
+      document.getElementById("payment-page").style.display = "block";
+    });
+    document.getElementById('cancel-button').addEventListener('click', () => {
+      cart = [];
+      updateCartList();
+      updateTotalAmount();
+    });
+
+    // Initial fetch
+    fetchData(FEEDS.CAMERA, "camera-image");
+    fetchData(FEEDS.LABEL, "label-data");
+    setInterval(() => {
+      fetchData(FEEDS.CAMERA, "camera-image"); 
+      fetchData(FEEDS.LABEL, "label-data");    
+    }, 5000);
+  </script>
 </body>
 </html>
