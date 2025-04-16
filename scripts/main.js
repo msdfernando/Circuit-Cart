@@ -124,7 +124,7 @@ async function fetchData(feedKey, elementId) {
     const response = await fetch(url, { headers: { "X-AIO-Key": ADAFRUIT_AIO_KEY } });
     if (!response.ok) throw new Error(`Failed to fetch data for feed: ${feedKey}`);
     const data = await response.json();
-    if (feedKey === FEEDS.CAMERA) {
+    if (feedKey === "camera") {  // Changed from FEEDS.CAMERA to "camera"
       displayImage(data.value, elementId);
     } else {
       updateCart(data.value);
@@ -251,11 +251,13 @@ function clearNumber() {
 }
 
 // Initial fetch and polling
-fetchData(FEEDS.CAMERA, "camera-image");
-fetchData(FEEDS.LABEL, "label-data");
+fetchData("camera", "camera-image");
+fetchData("label", "label-data");
+
+// And in the setInterval:
 setInterval(() => {
-  fetchData(FEEDS.CAMERA, "camera-image"); 
-  fetchData(FEEDS.LABEL, "label-data");    
+  fetchData("camera", "camera-image"); 
+  fetchData("label", "label-data");    
 }, 5000);
 
 // Export functions
@@ -265,10 +267,7 @@ export {
   sendBillViaSMS,
   goBackToDashboard,
   fetchData,
-  FEEDS,
   handlePayment,
   updateCartList,
-  updateTotalAmount,
-  increaseQuantity,
-  decreaseQuantity
+  updateTotalAmount
 };

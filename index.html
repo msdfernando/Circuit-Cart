@@ -94,22 +94,23 @@
   </div>
 
   <script type="module">
-    // Import your functions from main.js
+    // Remove the FEEDS import and use string literals directly
     import { 
       appendNumber, 
       clearNumber, 
       sendBillViaSMS, 
       goBackToDashboard,
       fetchData,
-      FEEDS,
-      handlePayment
+      handlePayment,
+      updateCartList,
+      updateTotalAmount
     } from './scripts/main.js';
-
+  
     // Event listeners for number pad
     document.querySelectorAll('.num-btn').forEach(btn => {
       btn.addEventListener('click', () => appendNumber(btn.dataset.number));
     });
-
+  
     document.getElementById('clear-btn').addEventListener('click', clearNumber);
     document.getElementById('send-btn').addEventListener('click', sendBillViaSMS);
     
@@ -121,13 +122,13 @@
       updateCartList();
       updateTotalAmount();
     });
-
-    // Initial fetch
-    fetchData(FEEDS.CAMERA, "camera-image");
-    fetchData(FEEDS.LABEL, "label-data");
+  
+    // Initial fetch - USING STRING LITERALS DIRECTLY
+    fetchData("camera", "camera-image");
+    fetchData("label", "label-data");
     setInterval(() => {
-      fetchData(FEEDS.CAMERA, "camera-image"); 
-      fetchData(FEEDS.LABEL, "label-data");    
+      fetchData("camera", "camera-image"); 
+      fetchData("label", "label-data");    
     }, 5000);
   </script>
 </body>
