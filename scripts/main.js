@@ -273,3 +273,17 @@ setInterval(() => {
   fetchData(FEEDS.CAMERA, "camera-image"); 
   fetchData(FEEDS.LABEL, "label-data");    
 }, 5000);
+
+// At the end of main.js
+export {
+  appendNumber,
+  clearNumber,
+  sendBillViaSMS,
+  selectPayment,
+  goBackToDashboard,
+  handleBarcodeScan,
+  fetchData,
+  FEEDS,
+  updateCartList,
+  updateTotalAmount
+};
