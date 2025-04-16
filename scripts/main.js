@@ -299,5 +299,8 @@ export {
   fetchData,
   FEEDS,
   updateCartList,
-  updateTotalAmount
+  updateTotalAmount,
+  increaseQuantity,
+  decreaseQuantity,
+  updateCartList
 };
