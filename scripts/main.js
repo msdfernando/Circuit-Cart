@@ -124,7 +124,7 @@ async function fetchData(feedKey, elementId) {
     const response = await fetch(url, { headers: { "X-AIO-Key": ADAFRUIT_AIO_KEY } });
     if (!response.ok) throw new Error(`Failed to fetch data for feed: ${feedKey}`);
     const data = await response.json();
-    if (feedKey === "camera") {  // Changed from FEEDS.CAMERA to "camera"
+    if (feedKey === "camera") {
       displayImage(data.value, elementId);
     } else {
       updateCart(data.value);
@@ -237,6 +237,12 @@ function goBackToDashboard() {
   document.getElementById("dashboard").style.display = "block";
 }
 
+function clearCart() {
+  cart = [];
+  updateCartList();
+  updateTotalAmount();
+}
+
 function isValidSriLankanPhoneNumber(phoneNumber) {
   return /^\d{10}$/.test(phoneNumber);
 }
@@ -261,10 +267,10 @@ setInterval(() => {
 }, 5000);
 
 // Export functions
-// At the bottom of main.js, only export what's needed:
 export {
   fetchData,
   handlePayment,
   goBackToDashboard,
-  sendBillViaSMS
+  sendBillViaSMS,
+  clearCart
 };

@@ -94,15 +94,15 @@
   </div>
 
   <script type="module">
-    // Update your imports to match exactly what's exported
     import { 
       fetchData,
       handlePayment,
       goBackToDashboard,
-      sendBillViaSMS
+      sendBillViaSMS,
+      clearCart // We'll add this new function
     } from './scripts/main.js';
   
-    // Number pad functions are now handled internally
+    // Number pad functions
     document.querySelectorAll('.num-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const phoneNumberInput = document.getElementById('phone-number');
@@ -116,15 +116,11 @@
       document.getElementById('phone-number').value = '';
     });
   
-    // Rest of your event listeners
+    // Event listeners using imported functions
     document.getElementById('send-btn').addEventListener('click', sendBillViaSMS);
     document.getElementById('back-to-dashboard').addEventListener('click', goBackToDashboard);
     document.getElementById('pay-button').addEventListener('click', handlePayment);
-    document.getElementById('cancel-button').addEventListener('click', () => {
-      cart = [];
-      updateCartList();
-      updateTotalAmount();
-    });
+    document.getElementById('cancel-button').addEventListener('click', clearCart);
   
     // Initial fetch
     fetchData("camera", "camera-image");
