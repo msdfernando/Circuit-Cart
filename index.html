@@ -7,8 +7,98 @@
   <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
+  <!-- Member Selection Landing Page -->
+  <div id="member-selection">
+    <header>
+      <img src="assets/logo.png" alt="Logo" class="logo">
+      <h1>Welcome to Circuit Cart</h1>
+    </header>
+
+    <main class="selection-main">
+      <div class="selection-container">
+        <h2>Choose Your Shopping Experience</h2>
+        <div class="selection-buttons">
+          <button type="button" id="member-btn" class="selection-btn member-btn">
+            <div class="btn-icon">👤</div>
+            <h3>Circuit Cart Member</h3>
+            <p>Scan your QR code to use wallet points</p>
+          </button>
+          <button type="button" id="guest-btn" class="selection-btn guest-btn">
+            <div class="btn-icon">🛒</div>
+            <h3>Not a Circuit Cart Member</h3>
+            <p>Continue as guest with regular payment</p>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>Powered by Circuit Cart</p>
+    </footer>
+  </div>
+
+  <!-- QR Scanner Page -->
+  <div id="qr-scanner" class="hidden">
+    <header>
+      <img src="assets/logo.png" alt="Logo" class="logo">
+      <h1>Scan Your QR Code</h1>
+    </header>
+
+    <main class="scanner-main">
+      <div class="scanner-container">
+        <div class="scanner-section">
+          <div class="usb-scanner-container">
+            <div class="scanner-icon">📱</div>
+            <h3>🔍 Scan Customer QR Code</h3>
+            <p><strong>Click in the field below and scan the QR code:</strong></p>
+            <input type="text" id="scanner-input" class="scanner-input"
+                   placeholder="🎯 CLICK HERE AND SCAN QR CODE"
+                   autocomplete="off" spellcheck="false">
+            <div class="scanner-button-container">
+              <button type="button" id="clear-scanner" class="btn btn-secondary">Clear</button>
+              <button type="button" id="focus-scanner" class="btn btn-primary">Focus Scanner</button>
+            </div>
+            <div id="scanner-status" class="scanner-status"></div>
+          </div>
+        </div>
+        <div class="scanner-actions">
+          <button type="button" id="back-to-selection" class="back-btn">← Back to Selection</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Customer Info Display Page -->
+  <div id="customer-info" class="hidden">
+    <header>
+      <img src="assets/logo.png" alt="Logo" class="logo">
+      <h1>Welcome Back!</h1>
+    </header>
+
+    <main class="customer-main">
+      <div class="customer-container">
+        <div class="customer-card">
+          <div class="customer-photo">
+            <img id="customer-photo" src="" alt="Customer Photo">
+          </div>
+          <div class="customer-details">
+            <h2 id="customer-name">Customer Name</h2>
+            <div class="wallet-info">
+              <span class="wallet-label">Wallet Balance:</span>
+              <span id="wallet-balance" class="wallet-amount">$0.00</span>
+            </div>
+          </div>
+        </div>
+        <div class="customer-actions">
+          <button type="button" id="continue-shopping" class="continue-btn">Continue Shopping</button>
+          <button type="button" id="back-to-scanner" class="back-btn">← Scan Different QR</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
   <!-- Main Dashboard -->
-  <div id="dashboard">
+  <div id="dashboard" class="hidden">
     <header>
       <img src="assets/logo.png" alt="Logo" class="logo">
     </header>
@@ -38,8 +128,8 @@
           <p>Total: $<span id="total-value">0.00</span></p>
         </div>
         <div class="buttons">
-          <button id="pay-button">PAY</button>
-          <button id="cancel-button">CANCEL</button>
+          <button type="button" id="pay-button">PAY</button>
+          <button type="button" id="cancel-button">CANCEL</button>
         </div>
       </div>
     </main>
@@ -53,7 +143,7 @@
   <div id="bill-page" class="hidden">
     <header>
       <h1>Payment Successful!</h1>
-      <button id="back-to-dashboard">Back to Home</button>
+      <button type="button" id="back-to-dashboard">Back to Home</button>
     </header>
 
     <main>
@@ -69,66 +159,38 @@
           </div>
         </div>
 
-        <!-- Right Side: Number Pad and Mobile Number Input -->
-        <div class="number-pad-section">
-          <div>
-            <input type="text" id="phone-number" placeholder="Enter phone number" readonly />
-          </div>
-          <div class="number-pad">
-            <button class="num-btn" data-number="1">1</button>
-            <button class="num-btn" data-number="2">2</button>
-            <button class="num-btn" data-number="3">3</button>
-            <button class="num-btn" data-number="4">4</button>
-            <button class="num-btn" data-number="5">5</button>
-            <button class="num-btn" data-number="6">6</button>
-            <button class="num-btn" data-number="7">7</button>
-            <button class="num-btn" data-number="8">8</button>
-            <button class="num-btn" data-number="9">9</button>
-            <button class="num-btn" data-number="0">0</button>
-            <button id="clear-btn">C</button>
-            <button id="send-btn">Send</button>
-          </div>
+        <!-- Right Side: Print Button -->
+        <div class="print-section">
+          <button type="button" id="print-bill-btn" class="print-button">
+            🖨️ Print Bill
+          </button>
         </div>
       </div>
     </main>
   </div>
 
   <script type="module">
-    import { 
-      fetchData,
+    import {
       handlePayment,
       goBackToDashboard,
-      sendBillViaSMS,
-      clearCart // We'll add this new function
+      printBill,
+      clearCart
     } from './scripts/main.js';
-  
-    // Number pad functions
-    document.querySelectorAll('.num-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const phoneNumberInput = document.getElementById('phone-number');
-        if (phoneNumberInput.value.length < 10) {
-          phoneNumberInput.value += btn.dataset.number;
-        }
-      });
+
+    import {
+      initializeNavigation
+    } from './scripts/navigation.js';
+
+    // Initialize navigation when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeNavigation();
+
+      // Event listeners using imported functions
+      document.getElementById('print-bill-btn').addEventListener('click', printBill);
+      document.getElementById('back-to-dashboard').addEventListener('click', goBackToDashboard);
+      document.getElementById('pay-button').addEventListener('click', handlePayment);
+      document.getElementById('cancel-button').addEventListener('click', clearCart);
     });
-  
-    document.getElementById('clear-btn').addEventListener('click', () => {
-      document.getElementById('phone-number').value = '';
-    });
-  
-    // Event listeners using imported functions
-    document.getElementById('send-btn').addEventListener('click', sendBillViaSMS);
-    document.getElementById('back-to-dashboard').addEventListener('click', goBackToDashboard);
-    document.getElementById('pay-button').addEventListener('click', handlePayment);
-    document.getElementById('cancel-button').addEventListener('click', clearCart);
-  
-    // Initial fetch
-    fetchData("camera", "camera-image");
-    fetchData("label", "label-data");
-    setInterval(() => {
-      fetchData("camera", "camera-image"); 
-      fetchData("label", "label-data");    
-    }, 5000);
   </script>
 </body>
 </html>
