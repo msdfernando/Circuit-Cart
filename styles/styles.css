@@ -135,6 +135,29 @@ main {
   margin-bottom: 20px;
 }
 
+#total-value {
+  text-align: right;
+}
+
+/* Discount styling */
+.discount-info {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.discount-line {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+}
+
+.discount-amount {
+  color: #28a745;
+  font-weight: bold;
+}
+
 /* Buttons */
 .buttons {
   display: flex;

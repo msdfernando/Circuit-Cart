@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Discount System - Circuit Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .discount-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .discount-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .discount-amount {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .total-line {
+            font-weight: bold;
+            font-size: 1.1em;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .payment-collection {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .rules-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Circuit Cart Discount System Test</h1>
+        <p>Test the discount system with different amounts:</p>
+        
+        <div class="test-item">
+            <span>Test $500 (No Discount)</span>
+            <button class="test-button" onclick="testDiscount(500)">Test</button>
+        </div>
+        
+        <div class="test-item">
+            <span>Test $1000 (10% Discount)</span>
+            <button class="test-button" onclick="testDiscount(1000)">Test</button>
+        </div>
+        
+        <div class="test-item">
+            <span>Test $1500 (10% Discount)</span>
+            <button class="test-button" onclick="testDiscount(1500)">Test</button>
+        </div>
+        
+        <div class="test-item">
+            <span>Test $2000 (20% Discount)</span>
+            <button class="test-button" onclick="testDiscount(2000)">Test</button>
+        </div>
+        
+        <div class="test-item">
+            <span>Test $3000 (20% Discount)</span>
+            <button class="test-button" onclick="testDiscount(3000)">Test</button>
+        </div>
+        
+        <div id="result" class="discount-info">
+            <h3>Transaction Details:</h3>
+            <div id="calculation-details"></div>
+            <div id="payment-collection" class="payment-collection">
+                <h4>Firestore Payment Collection (Aggregated Totals):</h4>
+                <p><strong>Note:</strong> The system maintains running totals for all customers</p>
+                <pre id="payment-json"></pre>
+                <div id="totals-explanation"></div>
+            </div>
+        </div>
+
+        <div class="rules-section">
+            <h3>Discount Rules:</h3>
+            <ul>
+                <li>Bills under $1000: No discount</li>
+                <li>Bills $1000 - $1999: 10% discount</li>
+                <li>Bills $2000 and above: 20% discount</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Discount calculation function (same as in main.js)
+        function calculateDiscount(subtotal) {
+            let discountPercentage = 0;
+            let discountAmount = 0;
+            
+            if (subtotal >= 2000) {
+                discountPercentage = 20;
+            } else if (subtotal >= 1000) {
+                discountPercentage = 10;
+            }
+            
+            if (discountPercentage > 0) {
+                discountAmount = (subtotal * discountPercentage) / 100;
+            }
+            
+            return {
+                percentage: discountPercentage,
+                amount: discountAmount,
+                finalTotal: subtotal - discountAmount
+            };
+        }
+
+        function testDiscount(amount) {
+            const discountInfo = calculateDiscount(amount);
+            const resultDiv = document.getElementById('result');
+            const detailsDiv = document.getElementById('calculation-details');
+            const paymentJsonDiv = document.getElementById('payment-json');
+
+            let html = `
+                <div class="discount-line">
+                    <span>Subtotal:</span>
+                    <span>$${amount.toFixed(2)}</span>
+                </div>
+            `;
+
+            if (discountInfo.percentage > 0) {
+                html += `
+                    <div class="discount-line discount-amount">
+                        <span>Discount (${discountInfo.percentage}%):</span>
+                        <span>-$${discountInfo.amount.toFixed(2)}</span>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="discount-line">
+                        <span>Discount:</span>
+                        <span>No discount applied</span>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="discount-line total-line">
+                    <span>Final Total:</span>
+                    <span>$${discountInfo.finalTotal.toFixed(2)}</span>
+                </div>
+            `;
+
+            // Show what gets added to Firestore payment collection totals
+            const paymentUpdate = {
+                amount: `+${discountInfo.finalTotal.toFixed(2)}`,
+                discount: `+${discountInfo.amount.toFixed(2)}`
+            };
+
+            const explanationDiv = document.getElementById('totals-explanation');
+            explanationDiv.innerHTML = `
+                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+                    <strong>How it works:</strong><br>
+                    • This transaction adds $${discountInfo.finalTotal.toFixed(2)} to total amount<br>
+                    • This transaction adds $${discountInfo.amount.toFixed(2)} to total discount<br>
+                    • The collection stores cumulative totals for ALL customers
+                </div>
+            `;
+
+            detailsDiv.innerHTML = html;
+            paymentJsonDiv.textContent = JSON.stringify(paymentUpdate, null, 2);
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

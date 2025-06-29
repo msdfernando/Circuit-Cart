@@ -1,6 +1,6 @@
 // Import Firebase - Updated 2025-06-24
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, updateDoc, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -34,6 +34,57 @@ const PRICES = {
   IODEX: { price: 200.00, description: "IODEX Bam, 9g" },
 };
 
+// Discount calculation function
+function calculateDiscount(subtotal) {
+  let discountPercentage = 0;
+  let discountAmount = 0;
+
+  if (subtotal >= 2000) {
+    discountPercentage = 20;
+  } else if (subtotal >= 1000) {
+    discountPercentage = 10;
+  }
+
+  if (discountPercentage > 0) {
+    discountAmount = (subtotal * discountPercentage) / 100;
+  }
+
+  return {
+    percentage: discountPercentage,
+    amount: discountAmount,
+    finalTotal: subtotal - discountAmount
+  };
+}
+
+// Update aggregated payment totals in Firestore
+async function updatePaymentTotals(amount, discount) {
+  try {
+    const paymentDocRef = doc(db, 'payments', 'totals');
+
+    // Check if document exists
+    const paymentDoc = await getDoc(paymentDocRef);
+
+    if (paymentDoc.exists()) {
+      // Update existing totals using increment
+      await updateDoc(paymentDocRef, {
+        amount: increment(amount),
+        discount: increment(discount)
+      });
+      console.log('Payment totals updated successfully');
+    } else {
+      // Create new document with initial values
+      await setDoc(paymentDocRef, {
+        amount: amount,
+        discount: discount
+      });
+      console.log('Payment totals document created successfully');
+    }
+  } catch (error) {
+    console.error('Error updating payment totals:', error);
+    throw error;
+  }
+}
+
 // Twilio 
 const TWILIO_ACCOUNT_SID = 'AC9802b8b790a4dae149be9a52a2c67620';
 const TWILIO_AUTH_TOKEN = '6aa01d546c7800614c6e791e298b8fbd';
@@ -60,7 +111,8 @@ async function saveBillToFirestore(paymentMethod = 'cash', pointsUsed = 0) {
   try {
     console.log('Attempting to save bill to Firestore...');
     console.log('Payment method being saved:', paymentMethod);
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discountInfo = calculateDiscount(subtotal);
     const customer = await getCurrentCustomer();
 
     const billData = {
@@ -71,7 +123,10 @@ async function saveBillToFirestore(paymentMethod = 'cash', pointsUsed = 0) {
         quantity: item.quantity,
         subtotal: item.price * item.quantity
       })),
-      totalAmount: total,
+      subtotalAmount: subtotal,
+      discountPercentage: discountInfo.percentage,
+      discountAmount: discountInfo.amount,
+      totalAmount: discountInfo.finalTotal,
       timestamp: serverTimestamp(),
       phoneNumber: document.getElementById('phone-number')?.value.trim() || null,
       // Customer information
@@ -81,7 +136,7 @@ async function saveBillToFirestore(paymentMethod = 'cash', pointsUsed = 0) {
       // Payment information
       paymentMethod: paymentMethod,
       pointsUsed: pointsUsed,
-      cashAmount: paymentMethod === 'points' ? 0 : total
+      cashAmount: paymentMethod === 'points' ? 0 : discountInfo.finalTotal
     };
 
     console.log('Bill data to save:', billData);
@@ -90,6 +145,10 @@ async function saveBillToFirestore(paymentMethod = 'cash', pointsUsed = 0) {
       // Try to save directly to Firebase first
       const docRef = await addDoc(collection(db, "bills"), billData);
       console.log('Bill saved successfully with ID:', docRef.id);
+
+      // Update aggregated payment totals in payments collection
+      await updatePaymentTotals(discountInfo.finalTotal, discountInfo.amount);
+
       return true;
     } catch (firebaseError) {
       console.warn('Direct Firebase save failed, trying via API...', firebaseError);
@@ -118,6 +177,15 @@ async function saveBillToFirestore(paymentMethod = 'cash', pointsUsed = 0) {
         if (response.ok) {
           const result = await response.json();
           console.log('Bill saved via API:', result);
+
+          // Update aggregated payment totals (even when using API fallback)
+          try {
+            await updatePaymentTotals(discountInfo.finalTotal, discountInfo.amount);
+          } catch (paymentError) {
+            console.warn('Failed to update payment totals:', paymentError);
+            // Don't fail the entire transaction if payment update fails
+          }
+
           return true;
         } else {
           const errorText = await response.text();
@@ -152,23 +220,44 @@ async function handlePayment() {
 
   const customer = await getCurrentCustomer();
   console.log('Current customer:', customer);
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  console.log('Total amount:', total);
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discountInfo = calculateDiscount(subtotal);
+  console.log('Subtotal amount:', subtotal);
+  console.log('Discount info:', discountInfo);
 
   if (customer) {
     console.log('Showing member payment options');
     // Member - show payment options
-    showMemberPaymentOptions(customer, total);
+    showMemberPaymentOptions(customer, discountInfo);
   } else {
     console.log('Showing guest payment options');
     // Guest - show payment method selection
-    showGuestPaymentOptions(total);
+    showGuestPaymentOptions(discountInfo);
   }
 }
 
 // Show payment options for guests
-function showGuestPaymentOptions(total) {
-  console.log('showGuestPaymentOptions called with total:', total);
+function showGuestPaymentOptions(discountInfo) {
+  console.log('showGuestPaymentOptions called with discountInfo:', discountInfo);
+
+  // Calculate subtotal for display
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  // Build discount display HTML
+  let discountHTML = '';
+  if (discountInfo.percentage > 0) {
+    discountHTML = `
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: left;">
+        <p style="margin: 5px 0;"><strong>Subtotal: $${subtotal.toFixed(2)}</strong></p>
+        <p style="margin: 5px 0; color: #28a745;"><strong>Discount (${discountInfo.percentage}%): -$${discountInfo.amount.toFixed(2)}</strong></p>
+        <hr style="margin: 10px 0;">
+        <p style="margin: 5px 0; font-size: 1.1em;"><strong>Final Total: $${discountInfo.finalTotal.toFixed(2)}</strong></p>
+      </div>
+    `;
+  } else {
+    discountHTML = `<p><strong>Total: $${discountInfo.finalTotal.toFixed(2)}</strong></p>`;
+  }
+
   let paymentOptionsHTML = `
     <div id="payment-options-modal" style="
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -180,7 +269,7 @@ function showGuestPaymentOptions(total) {
         max-width: 500px; width: 90%; text-align: center;
       ">
         <h2>Choose Payment Method</h2>
-        <p><strong>Total: $${total.toFixed(2)}</strong></p>
+        ${discountHTML}
 
         <div style="
           display: grid; grid-template-columns: repeat(2, 1fr);
@@ -253,16 +342,34 @@ function showGuestPaymentOptions(total) {
   document.head.appendChild(style);
 
   // Add event listeners
-  document.getElementById('pay-with-ezcash').addEventListener('click', () => handleGuestPayment('EZ Cash', total));
-  document.getElementById('pay-with-ipay').addEventListener('click', () => handleGuestPayment('iPay', total));
-  document.getElementById('pay-with-mcash').addEventListener('click', () => handleGuestPayment('mCash', total));
-  document.getElementById('pay-with-cash').addEventListener('click', () => handleGuestPayment('Cash', total));
+  document.getElementById('pay-with-ezcash').addEventListener('click', () => handleGuestPayment('EZ Cash', discountInfo.finalTotal));
+  document.getElementById('pay-with-ipay').addEventListener('click', () => handleGuestPayment('iPay', discountInfo.finalTotal));
+  document.getElementById('pay-with-mcash').addEventListener('click', () => handleGuestPayment('mCash', discountInfo.finalTotal));
+  document.getElementById('pay-with-cash').addEventListener('click', () => handleGuestPayment('Cash', discountInfo.finalTotal));
   document.getElementById('cancel-payment').addEventListener('click', closePaymentModal);
 }
 
 // Show payment options for members
-function showMemberPaymentOptions(customer, total) {
+function showMemberPaymentOptions(customer, discountInfo) {
   const walletBalance = customer.wallet_balance || 0;
+
+  // Calculate subtotal for display
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  // Build discount display HTML
+  let discountHTML = '';
+  if (discountInfo.percentage > 0) {
+    discountHTML = `
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: left;">
+        <p style="margin: 5px 0;"><strong>Subtotal: $${subtotal.toFixed(2)}</strong></p>
+        <p style="margin: 5px 0; color: #28a745;"><strong>Discount (${discountInfo.percentage}%): -$${discountInfo.amount.toFixed(2)}</strong></p>
+        <hr style="margin: 10px 0;">
+        <p style="margin: 5px 0; font-size: 1.1em;"><strong>Final Total: $${discountInfo.finalTotal.toFixed(2)}</strong></p>
+      </div>
+    `;
+  } else {
+    discountHTML = `<p><strong>Total: $${discountInfo.finalTotal.toFixed(2)}</strong></p>`;
+  }
 
   let paymentOptionsHTML = `
     <div id="payment-options-modal" style="
@@ -275,20 +382,20 @@ function showMemberPaymentOptions(customer, total) {
         max-width: 400px; width: 90%; text-align: center;
       ">
         <h2>Choose Payment Method</h2>
-        <p><strong>Total: $${total.toFixed(2)}</strong></p>
+        ${discountHTML}
         <p>Wallet Balance: $${walletBalance.toFixed(2)}</p>
 
         <div style="margin: 20px 0;">
   `;
 
-  if (walletBalance >= total) {
+  if (walletBalance >= discountInfo.finalTotal) {
     paymentOptionsHTML += `
       <button id="pay-with-points" style="
         background: #28a745; color: white; border: none;
         padding: 15px 20px; margin: 10px; border-radius: 8px;
         cursor: pointer; width: 100%; font-size: 1.1em;
       ">
-        Pay with Wallet Points ($${total.toFixed(2)})
+        Pay with Wallet Points ($${discountInfo.finalTotal.toFixed(2)})
       </button>
     `;
   } else {
@@ -328,7 +435,7 @@ function showMemberPaymentOptions(customer, total) {
   const cancelBtn = document.getElementById('cancel-payment');
 
   if (payWithPointsBtn) {
-    payWithPointsBtn.addEventListener('click', () => handlePointsPayment(customer, total));
+    payWithPointsBtn.addEventListener('click', () => handlePointsPayment(customer, discountInfo.finalTotal));
   }
 
   if (payWithCashBtn) {
@@ -465,7 +572,8 @@ async function printBill() {
 
   // Get current bill data
   const customer = await getCurrentCustomer();
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discountInfo = calculateDiscount(subtotal);
   const currentDate = new Date().toLocaleString();
 
   // Generate print content
@@ -543,8 +651,21 @@ async function printBill() {
         </div>
       `).join('')}
 
+      ${discountInfo.percentage > 0 ? `
+        <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+          <div class="bill-item">
+            <span><strong>Subtotal:</strong></span>
+            <span><strong>$${subtotal.toFixed(2)}</strong></span>
+          </div>
+          <div class="bill-item" style="color: #28a745;">
+            <span><strong>Discount (${discountInfo.percentage}%):</strong></span>
+            <span><strong>-$${discountInfo.amount.toFixed(2)}</strong></span>
+          </div>
+        </div>
+      ` : ''}
+
       <div class="total">
-        Total: $${total.toFixed(2)}
+        Total: $${discountInfo.finalTotal.toFixed(2)}
       </div>
 
       <div class="footer">
@@ -668,7 +789,31 @@ function decreaseQuantity(label) {
 function updateTotalAmount() {
   const totalElement = document.getElementById("total-value");
   if (totalElement) {
-    totalElement.textContent = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discountInfo = calculateDiscount(subtotal);
+
+    if (discountInfo.percentage > 0) {
+      // Show discount information
+      totalElement.innerHTML = `
+        <div class="discount-info">
+          <div class="discount-line">
+            <span>Subtotal:</span>
+            <span>$${subtotal.toFixed(2)}</span>
+          </div>
+          <div class="discount-line discount-amount">
+            <span>Discount (${discountInfo.percentage}%):</span>
+            <span>-$${discountInfo.amount.toFixed(2)}</span>
+          </div>
+          <hr style="margin: 8px 0;">
+          <div class="discount-line" style="font-weight: bold; font-size: 1.1em;">
+            <span>Total:</span>
+            <span>$${discountInfo.finalTotal.toFixed(2)}</span>
+          </div>
+        </div>
+      `;
+    } else {
+      totalElement.innerHTML = `<div style="text-align: right;">Total: $${discountInfo.finalTotal.toFixed(2)}</div>`;
+    }
   }
 }
 
@@ -678,7 +823,8 @@ async function displayBill() {
 
   if (billItemsElement && billTotalElement) {
     const customer = await getCurrentCustomer();
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discountInfo = calculateDiscount(subtotal);
 
     billItemsElement.innerHTML = "";
 
@@ -715,7 +861,25 @@ async function displayBill() {
       billItemsElement.appendChild(itemElement);
     });
 
-    billTotalElement.textContent = total.toFixed(2);
+    // Add discount information if applicable
+    if (discountInfo.percentage > 0) {
+      const discountElement = document.createElement("div");
+      discountElement.innerHTML = `
+        <div style="border-top: 2px solid #ddd; padding-top: 15px; margin-top: 15px;">
+          <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+            <span><strong>Subtotal:</strong></span>
+            <span><strong>$${subtotal.toFixed(2)}</strong></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin: 5px 0; color: #28a745;">
+            <span><strong>Discount (${discountInfo.percentage}%):</strong></span>
+            <span><strong>-$${discountInfo.amount.toFixed(2)}</strong></span>
+          </div>
+        </div>
+      `;
+      billItemsElement.appendChild(discountElement);
+    }
+
+    billTotalElement.textContent = discountInfo.finalTotal.toFixed(2);
   }
 }
 
